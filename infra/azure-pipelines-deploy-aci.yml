@@ -1,0 +1,75 @@
+# Azure Pipelines - Deploy to Azure Container Instances (ACI)
+# This pipeline builds the Docker image (optional), pushes to ACR, then deploys
+# the ARM template `azure-container-instance.json` to the specified resource group.
+
+trigger:
+  branches:
+    include:
+      - main
+
+variables:
+  imageName: 'ati-webportal-ui'
+  imageTag: '$(Build.BuildId)'
+  acrName: 'atiportal'
+  resourceGroup: 'aci-resource-group'
+  location: 'eastus'
+  templateFile: 'azure-container-instance.json'
+  parametersFile: 'infra/azure-container-instance.parameters.json'
+
+stages:
+  - stage: BuildAndPush
+    displayName: Build and Push Docker Image
+    jobs:
+      - job: Build
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: Docker@2
+            displayName: Build and push image to ACR
+            inputs:
+              command: buildAndPush
+              containerRegistry: '$(acrName).azurecr.io'
+              repository: '$(acrName)/$(imageName)'
+              tags: '$(imageTag)'
+
+  - stage: DeployACI
+    displayName: Deploy to Azure Container Instances
+    dependsOn: BuildAndPush
+    jobs:
+      - job: Deploy
+        pool:
+          vmImage: 'ubuntu-latest'
+        steps:
+          - task: AzureCLI@2
+            displayName: 'Azure CLI: What-If deployment (preview)'
+            inputs:
+              azureSubscription: '$(azureSubscription)'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                az deployment group what-if \
+                  --resource-group $(resourceGroup) \
+                  --template-file $(System.DefaultWorkingDirectory)/$(templateFile) \
+                  --parameters @$(System.DefaultWorkingDirectory)/$(parametersFile)
+
+          - task: AzureCLI@2
+            displayName: 'Azure CLI: Deploy ARM template to ACI'
+            inputs:
+              azureSubscription: '$(azureSubscription)'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                az deployment group create \
+                  --resource-group $(resourceGroup) \
+                  --template-file $(System.DefaultWorkingDirectory)/$(templateFile) \
+                  --parameters @$(System.DefaultWorkingDirectory)/$(parametersFile) \
+                  --name ati-webportal-aci-deployment
+
+          - task: AzureCLI@2
+            displayName: 'Show deployment outputs'
+            inputs:
+              azureSubscription: '$(azureSubscription)'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                az deployment group show --resource-group $(resourceGroup) --name ati-webportal-aci-deployment --query properties.outputs -o json

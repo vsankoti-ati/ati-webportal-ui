@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ati-webportal-ui
+  labels:
+    app: ati-webportal-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ati-webportal-ui
+  template:
+    metadata:
+      labels:
+        app: ati-webportal-ui
+    spec:
+      containers:
+      - name: ati-webportal-ui
+        image: atiportal.azurecr.io/ati-webportal-ui:local
+        ports:
+        - containerPort: 3000
+          name: http
+          protocol: TCP
+        env:
+        - name: NODE_ENV
+          value: "local"
+        - name: NEXT_TELEMETRY_DISABLED
+          value: "1"
+        - name: PORT
+          value: "3000"
+        - name: NEXT_PUBLIC_SKIP_MSAL
+          value: "true"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ati-webportal-ui-service
+  labels:
+    app: ati-webportal-ui
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 3000
+    protocol: TCP
+    name: http
+  selector:
+    app: ati-webportal-ui
+---
+# Optional: Ingress for custom domain and HTTPS
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ati-webportal-ui-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  tls:
+  - hosts:
+    - your-domain.com
+    secretName: ati-webportal-tls
+  rules:
+  - host: your-domain.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: ati-webportal-ui-service
+            port:
+              number: 80
