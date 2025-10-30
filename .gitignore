@@ -27,3 +27,4 @@ vercel
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+.fake
