@@ -27,7 +27,8 @@ import {
 import { format } from 'date-fns';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useAuth } from '@/hooks/useAuth';
-import HomeIcon from '@mui/icons-material/Home';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import Layout from '@/components/Layout';
 
 export default function TimesheetReview() {
   const router = useRouter();
@@ -97,10 +98,6 @@ export default function TimesheetReview() {
     }
   };
 
-  const handleBackToHome = () => {
-    router.push('/');
-  };
-
   const totalHours = timeEntries?.reduce(
     (sum, entry) => sum + entry.hours_worked,
     0
@@ -108,43 +105,51 @@ export default function TimesheetReview() {
 
   if (!user?.roles.includes('Admin')) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Typography>You don't have permission to access this page.</Typography>
-      </Container>
+      <ProtectedRoute>
+        <Layout>
+          <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+            <Typography>You don't have permission to access this page.</Typography>
+          </Container>
+        </Layout>
+      </ProtectedRoute>
     );
   }
 
   if (isLoadingTimesheet) {
-    return <div>Loading...</div>;
+    return (
+      <ProtectedRoute>
+        <Layout>
+          <div>Loading...</div>
+        </Layout>
+      </ProtectedRoute>
+    );
   }
 
   if (!timesheet) {
-    return <div>Timesheet not found</div>;
+    return (
+      <ProtectedRoute>
+        <Layout>
+          <div>Timesheet not found</div>
+        </Layout>
+      </ProtectedRoute>
+    );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-        <Box display="flex" alignItems="center" gap={2}>
-          <Button
-            variant="outlined"
-            startIcon={<HomeIcon />}
-            onClick={handleBackToHome}
-            size="small"
-          >
-            Back to Home
-          </Button>
-          <Typography variant="h4" component="h1">
-            Review Timesheet
-          </Typography>
-        </Box>
-        <Button
-          variant="outlined"
-          onClick={() => router.push('/timesheets/approvals')}
-        >
-          Back to Approvals
-        </Button>
-      </Box>
+    <ProtectedRoute>
+      <Layout>
+        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
+            <Typography variant="h4" component="h1">
+              Review Timesheet
+            </Typography>
+            <Button
+              variant="outlined"
+              onClick={() => router.push('/timesheets/approvals')}
+            >
+              Back to Approvals
+            </Button>
+          </Box>
 
       {(approveMutation.isError || rejectMutation.isError) && (
         <Alert severity="error" sx={{ mb: 2 }}>
@@ -292,7 +297,9 @@ export default function TimesheetReview() {
           </TableContainer>
         </Grid>
       </Grid>
-    </Container>
+        </Container>
+      </Layout>
+    </ProtectedRoute>
   );
 }
 

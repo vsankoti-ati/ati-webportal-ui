@@ -17,9 +17,10 @@ import { useQuery } from 'react-query';
 import { fetchMyTimesheets } from '@/services/timesheetService';
 import { Timesheet } from '@/types/timesheet';
 import AddIcon from '@mui/icons-material/Add';
-import HomeIcon from '@mui/icons-material/Home';
 import { useRouter } from 'next/router';
 import { format } from 'date-fns';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import Layout from '@/components/Layout';
 
 const getStatusColor = (status: Timesheet['status']) => {
   switch (status) {
@@ -48,39 +49,33 @@ export default function TimesheetList() {
     router.push(`/timesheets/${id}`);
   };
 
-  const handleBackToHome = () => {
-    router.push('/');
-  };
-
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <ProtectedRoute>
+        <Layout>
+          <div>Loading...</div>
+        </Layout>
+      </ProtectedRoute>
+    );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-        <Box display="flex" alignItems="center" gap={2}>
-          <Button
-            variant="outlined"
-            startIcon={<HomeIcon />}
-            onClick={handleBackToHome}
-            size="small"
-          >
-            Back to Home
-          </Button>
-          <Typography variant="h4" component="h1">
-            My Timesheets
-          </Typography>
-        </Box>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-          onClick={handleCreate}
-        >
-          New Timesheet
-        </Button>
-      </Box>
+    <ProtectedRoute>
+      <Layout>
+        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
+            <Typography variant="h4" component="h1">
+              My Timesheets
+            </Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<AddIcon />}
+              onClick={handleCreate}
+            >
+              New Timesheet
+            </Button>
+          </Box>
 
       <TableContainer component={Paper}>
         <Table>
@@ -141,7 +136,9 @@ export default function TimesheetList() {
           </TableBody>
         </Table>
       </TableContainer>
-    </Container>
+        </Container>
+      </Layout>
+    </ProtectedRoute>
   );
 }
 

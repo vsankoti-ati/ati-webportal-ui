@@ -3,7 +3,8 @@ import { Box, Container, Paper, Typography, ButtonGroup, Button } from '@mui/mat
 import WeeklySummary from '@/components/timesheets/WeeklySummary';
 import { startOfWeek, endOfWeek, addWeeks, subWeeks } from 'date-fns';
 import { useRouter } from 'next/router';
-import HomeIcon from '@mui/icons-material/Home';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import Layout from '@/components/Layout';
 
 export default function TimesheetSummaryPage() {
   const router = useRouter();
@@ -12,10 +13,6 @@ export default function TimesheetSummaryPage() {
   );
 
   const weekEnd = endOfWeek(currentWeekStart, { weekStartsOn: 1 });
-
-  const handleBackToHome = () => {
-    router.push('/');
-  };
 
   const handlePreviousWeek = () => {
     setCurrentWeekStart(prev => subWeeks(prev, 1));
@@ -30,32 +27,26 @@ export default function TimesheetSummaryPage() {
   };
 
   return (
-    <Box sx={{ py: 4 }}>
-      <Container maxWidth="lg">
-        <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Button
-            variant="outlined"
-            startIcon={<HomeIcon />}
-            onClick={handleBackToHome}
-            size="small"
-          >
-            Back to Home
-          </Button>
-          <Typography variant="h4" component="h1">
-            Weekly Summary
-          </Typography>
-        </Box>
-        <Box sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>
-          <ButtonGroup variant="contained" color="primary">
-            <Button onClick={handlePreviousWeek}>Previous Week</Button>
-            <Button onClick={handleCurrentWeek}>Current Week</Button>
-            <Button onClick={handleNextWeek}>Next Week</Button>
-          </ButtonGroup>
-        </Box>
+    <ProtectedRoute>
+      <Layout>
+        <Box sx={{ py: 4 }}>
+          <Container maxWidth="lg">
+            <Typography variant="h4" component="h1" sx={{ mb: 2 }}>
+              Weekly Summary
+            </Typography>
+            <Box sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>
+              <ButtonGroup variant="contained" color="primary">
+                <Button onClick={handlePreviousWeek}>Previous Week</Button>
+                <Button onClick={handleCurrentWeek}>Current Week</Button>
+                <Button onClick={handleNextWeek}>Next Week</Button>
+              </ButtonGroup>
+            </Box>
 
-        <WeeklySummary startDate={currentWeekStart} endDate={weekEnd} />
-      </Container>
-    </Box>
+            <WeeklySummary startDate={currentWeekStart} endDate={weekEnd} />
+          </Container>
+        </Box>
+      </Layout>
+    </ProtectedRoute>
   );
 }
 

@@ -15,7 +15,8 @@ import { useRouter } from 'next/router';
 import { useForm } from 'react-hook-form';
 import { CreateTimesheetDto } from '@/types/timesheet';
 import { startOfWeek, endOfWeek, format } from 'date-fns';
-import HomeIcon from '@mui/icons-material/Home';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import Layout from '@/components/Layout';
 
 export default function NewTimesheet() {
   const router = useRouter();
@@ -45,27 +46,15 @@ export default function NewTimesheet() {
     createMutation.mutate(data);
   };
 
-  const handleBackToHome = () => {
-    router.push('/');
-  };
-
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-        <Box display="flex" alignItems="center" gap={2}>
-          <Button
-            variant="outlined"
-            startIcon={<HomeIcon />}
-            onClick={handleBackToHome}
-            size="small"
-          >
-            Back to Home
-          </Button>
-          <Typography variant="h4" component="h1">
-            Create New Timesheet
-          </Typography>
-        </Box>
-      </Box>
+    <ProtectedRoute>
+      <Layout>
+        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
+            <Typography variant="h4" component="h1">
+              Create New Timesheet
+            </Typography>
+          </Box>
 
       {createMutation.isError && (
         <Alert severity="error" sx={{ mb: 2 }}>
@@ -118,7 +107,9 @@ export default function NewTimesheet() {
           </Box>
         </form>
       </Paper>
-    </Container>
+        </Container>
+      </Layout>
+    </ProtectedRoute>
   );
 }
 

@@ -1,12 +1,12 @@
 
 az login 
 
-az acr login --name atiportal
-az login --name atiportal
+az acr login --name atiportal --expose-token
 
-docker build -t ati-webportal-ui:localv6 .
-docker tag ati-webportal-ui:localv6 atiportal.azurecr.io/ati-webportal-ui:localv6
 
-docker push atiportal.azurecr.io/ati-webportal-ui:localv6
+docker build -t ati-webportal-ui:localv13 .
+docker tag ati-webportal-ui:localv13 atiportal.azurecr.io/ati-webportal-ui:localv13
+
+docker push atiportal.azurecr.io/ati-webportal-ui:localv13
 
 # az container create --resource-group ati-portal-ui --name ati-webportal-ui --image atiportal.azurecr.io/ati-webportal-ui:localv4 --ports 3000 --ip-address Public --environment-variables NODE_ENV=local NEXT_TELEMETRY_DISABLED=1 NEXT_PUBLIC_SKIP_MSAL=true PORT=3000 --cpu 1 --memory 1.5

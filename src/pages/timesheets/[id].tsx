@@ -29,7 +29,8 @@ import { fetchActiveProjects } from '@/services/projectService';
 import { format } from 'date-fns';
 import TimeEntryForm from '@/components/timesheets/TimeEntryForm';
 import { useConfirm } from '@/hooks/useConfirm';
-import HomeIcon from '@mui/icons-material/Home';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import Layout from '@/components/Layout';
 
 export default function TimesheetDetails() {
   const router = useRouter();
@@ -85,78 +86,78 @@ export default function TimesheetDetails() {
     }
   };
 
-  const handleBackToHome = () => {
-    router.push('/');
-  };
-
   const totalHours = timeEntries?.reduce(
     (sum, entry) => sum + entry.hours_worked,
     0
   ) || 0;
 
   if (isLoadingTimesheet) {
-    return <div>Loading...</div>;
+    return (
+      <ProtectedRoute>
+        <Layout>
+          <div>Loading...</div>
+        </Layout>
+      </ProtectedRoute>
+    );
   }
 
   if (!timesheet) {
-    return <div>Timesheet not found</div>;
+    return (
+      <ProtectedRoute>
+        <Layout>
+          <div>Timesheet not found</div>
+        </Layout>
+      </ProtectedRoute>
+    );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-        <Box display="flex" alignItems="center" gap={2}>
-          <Button
-            variant="outlined"
-            startIcon={<HomeIcon />}
-            onClick={handleBackToHome}
-            size="small"
-          >
-            Back to Home
-          </Button>
-          <Typography variant="h4" component="h1">
-            Timesheet Details
-          </Typography>
-        </Box>
-        <Box display="flex" gap={2}>
-          <Button
-            variant="outlined"
-            onClick={() => router.push('/timesheets')}
-          >
-            Back to List
-          </Button>
-          {timesheet.status === 'draft' && (
-            <>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSubmit}
-                disabled={submitMutation.isLoading || totalHours === 0}
-              >
-                {submitMutation.isLoading ? 'Submitting...' : 'Submit Timesheet'}
-              </Button>
+    <ProtectedRoute>
+      <Layout>
+        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
+            <Typography variant="h4" component="h1">
+              Timesheet Details
+            </Typography>
+            <Box display="flex" gap={2}>
               <Button
                 variant="outlined"
-                color="error"
-                onClick={async () => {
-                  const confirmed = await showConfirm({
-                    title: 'Delete Timesheet',
-                    message: 'Are you sure you want to delete this timesheet? This action cannot be undone.',
-                    confirmText: 'Delete',
-                    cancelText: 'Cancel',
-                  });
-                  if (confirmed) {
-                    deleteTimesheetMutation.mutate(Number(id));
-                  }
-                }}
-                disabled={deleteTimesheetMutation.isLoading}
+                onClick={() => router.push('/timesheets')}
               >
-                {deleteTimesheetMutation.isLoading ? 'Deleting...' : 'Delete Timesheet'}
+                Back to List
               </Button>
-            </>
-          )}
-        </Box>
-      </Box>
+              {timesheet.status === 'draft' && (
+                <>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleSubmit}
+                    disabled={submitMutation.isLoading || totalHours === 0}
+                  >
+                    {submitMutation.isLoading ? 'Submitting...' : 'Submit Timesheet'}
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={async () => {
+                      const confirmed = await showConfirm({
+                        title: 'Delete Timesheet',
+                        message: 'Are you sure you want to delete this timesheet? This action cannot be undone.',
+                        confirmText: 'Delete',
+                        cancelText: 'Cancel',
+                      });
+                      if (confirmed) {
+                        deleteTimesheetMutation.mutate(Number(id));
+                      }
+                    }}
+                    disabled={deleteTimesheetMutation.isLoading}
+                  >
+                    {deleteTimesheetMutation.isLoading ? 'Deleting...' : 'Delete Timesheet'}
+                  </Button>
+                </>
+              )}
+            </Box>
+          </Box>
 
       {submitMutation.isError && (
         <Alert severity="error" sx={{ mb: 2 }}>
@@ -309,7 +310,9 @@ export default function TimesheetDetails() {
           </TableContainer>
         </Grid>
       </Grid>
-    </Container>
+        </Container>
+      </Layout>
+    </ProtectedRoute>
   );
 }
 

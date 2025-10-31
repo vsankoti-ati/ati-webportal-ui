@@ -20,8 +20,9 @@ import { JobOpening } from '@/types/jobOpening';
 import JobOpeningCard from '@/components/job-openings/JobOpeningCard';
 import AddIcon from '@mui/icons-material/Add';
 import InfoIcon from '@mui/icons-material/Info';
-import HomeIcon from '@mui/icons-material/Home';
 import { useAuth } from '@/hooks/useAuth';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import Layout from '@/components/Layout';
 
 // Check if we're using mock data
 const useMockData = process.env.NEXT_PUBLIC_SKIP_MSAL === 'true' || 
@@ -40,73 +41,55 @@ export default function JobOpeningsList() {
     router.push(`/job-openings/${id}`);
   };
 
-  const handleBackToHome = () => {
-    router.push('/');
-  };
-
   if (isLoading) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-          <Box display="flex" alignItems="center" gap={2}>
-            <Button
-              variant="outlined"
-              startIcon={<HomeIcon />}
-              onClick={handleBackToHome}
-              size="small"
-            >
-              Back to Home
-            </Button>
-            <Skeleton variant="text" width="200px" height="40px" />
-          </Box>
-          <Skeleton variant="rectangular" width="150px" height="36px" />
-        </Box>
-        <Grid container spacing={3}>
-          {Array.from(new Array(6)).map((_, index) => (
-            <Grid item xs={12} sm={6} md={4} key={index}>
-              <Card>
-                <CardContent>
-                  <Skeleton variant="text" width="80%" height="32px" />
-                  <Skeleton variant="text" width="60%" height="20px" />
-                  <Skeleton variant="text" width="100%" height="16px" />
-                  <Skeleton variant="text" width="100%" height="16px" />
-                  <Skeleton variant="text" width="70%" height="16px" />
-                </CardContent>
-              </Card>
+      <ProtectedRoute>
+        <Layout>
+          <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
+              <Skeleton variant="text" width="200px" height="40px" />
+              <Skeleton variant="rectangular" width="150px" height="36px" />
+            </Box>
+            <Grid container spacing={3}>
+              {Array.from(new Array(6)).map((_, index) => (
+                <Grid item xs={12} sm={6} md={4} key={index}>
+                  <Card>
+                    <CardContent>
+                      <Skeleton variant="text" width="80%" height="32px" />
+                      <Skeleton variant="text" width="60%" height="20px" />
+                      <Skeleton variant="text" width="100%" height="16px" />
+                      <Skeleton variant="text" width="100%" height="16px" />
+                      <Skeleton variant="text" width="70%" height="16px" />
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
             </Grid>
-          ))}
-        </Grid>
-      </Container>
+          </Container>
+        </Layout>
+      </ProtectedRoute>
     );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-        <Box display="flex" alignItems="center" gap={2}>
-          <Button
-            variant="outlined"
-            startIcon={<HomeIcon />}
-            onClick={handleBackToHome}
-            size="small"
-          >
-            Back to Home
-          </Button>
-          <Typography variant="h4" component="h1">
-            Job Openings
-          </Typography>
-        </Box>
-        {(user?.roles.includes('Admin') || user?.roles.includes('HR')) && (
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<AddIcon />}
-            onClick={handleAddNew}
-          >
-            Add New Position
-          </Button>
-        )}
-      </Box>
+    <ProtectedRoute>
+      <Layout>
+        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
+            <Typography variant="h4" component="h1">
+              Job Openings
+            </Typography>
+            {(user?.roles.includes('Admin') || user?.roles.includes('HR')) && (
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<AddIcon />}
+                onClick={handleAddNew}
+              >
+                Add New Position
+              </Button>
+            )}
+          </Box>
 
       {/* Mock Data Info Banner */}
       {useMockData && (
@@ -142,7 +125,9 @@ export default function JobOpeningsList() {
           </Grid>
         )}
       </Grid>
-    </Container>
+        </Container>
+      </Layout>
+    </ProtectedRoute>
   );
 }
 

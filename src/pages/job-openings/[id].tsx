@@ -17,9 +17,10 @@ import { useQuery } from 'react-query';
 import { fetchJobOpening } from '@/services/jobOpeningService';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import HomeIcon from '@mui/icons-material/Home';
 import { useAuth } from '@/hooks/useAuth';
 import ReferCandidateDialog from '@/components/job-openings/ReferCandidateDialog';
+import { ProtectedRoute } from '@/components/ProtectedRoute';
+import Layout from '@/components/Layout';
 
 export default function JobOpeningDetails() {
   const router = useRouter();
@@ -47,58 +48,52 @@ export default function JobOpeningDetails() {
     setReferDialogOpen(true);
   };
 
-  const handleBackToHome = () => {
-    router.push('/');
-  };
-
   if (isLoading || !job) {
-    return <div>Loading...</div>;
+    return (
+      <ProtectedRoute>
+        <Layout>
+          <div>Loading...</div>
+        </Layout>
+      </ProtectedRoute>
+    );
   }
 
   const isAdminOrHR = user?.roles.includes('Admin') || user?.roles.includes('HR');
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-        <Box display="flex" alignItems="center" gap={2}>
-          <Button
-            variant="outlined"
-            startIcon={<HomeIcon />}
-            onClick={handleBackToHome}
-            size="small"
-          >
-            Back to Home
-          </Button>
-          <Typography variant="h4" component="h1">
-            {job.title}
-          </Typography>
-        </Box>
-        <Box display="flex" gap={2}>
-          {isAdminOrHR && (
-            <>
-              <Button
-                variant="outlined"
-                color="primary"
-                startIcon={<EditIcon />}
-                onClick={handleEdit}
-              >
-                Edit
+    <ProtectedRoute>
+      <Layout>
+        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
+            <Typography variant="h4" component="h1">
+              {job.title}
+            </Typography>
+            <Box display="flex" gap={2}>
+              {isAdminOrHR && (
+                <>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    startIcon={<EditIcon />}
+                    onClick={handleEdit}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    startIcon={<DeleteIcon />}
+                    onClick={handleDelete}
+                  >
+                    Delete
+                  </Button>
+                </>
+              )}
+              <Button variant="contained" color="primary" onClick={handleRefer}>
+                Refer a Candidate
               </Button>
-              <Button
-                variant="outlined"
-                color="error"
-                startIcon={<DeleteIcon />}
-                onClick={handleDelete}
-              >
-                Delete
-              </Button>
-            </>
-          )}
-          <Button variant="contained" color="primary" onClick={handleRefer}>
-            Refer a Candidate
-          </Button>
-        </Box>
-      </Box>
+            </Box>
+          </Box>
 
       <Grid container spacing={3}>
         <Grid item xs={12} md={8}>
@@ -189,7 +184,9 @@ export default function JobOpeningDetails() {
         onClose={() => setReferDialogOpen(false)}
         jobOpening={job}
       />
-    </Container>
+        </Container>
+      </Layout>
+    </ProtectedRoute>
   );
 }
 
