@@ -40,8 +40,11 @@ describe('LoginPage', () => {
     expect(screen.getByText('ATI Web Portal')).toBeInTheDocument()
     expect(screen.getByText('Sign in to your account')).toBeInTheDocument()
     expect(screen.getByText('Sign in with Microsoft')).toBeInTheDocument()
-    expect(screen.getByLabelText('Email')).toBeInTheDocument()
-    expect(screen.getByLabelText('Password')).toBeInTheDocument()
+    
+    // MUI TextFields render as textbox role
+    const textboxes = screen.getAllByRole('textbox')
+    expect(textboxes).toHaveLength(2) // Email and Password fields
+    
     expect(screen.getByRole('button', { name: /sign in$/i })).toBeInTheDocument()
   })
 
@@ -59,8 +62,8 @@ describe('LoginPage', () => {
     mockLogin.mockResolvedValue(undefined)
     render(<LoginPage />)
 
-    const adminUser = screen.getByText('Admin User').closest('[role="button"]')
-    fireEvent.click(adminUser!)
+    const adminUser = screen.getByText('admin@atiwebportal.com')
+    fireEvent.click(adminUser)
 
     await waitFor(() => {
       expect(mockLogin).toHaveBeenCalledWith({
@@ -80,8 +83,9 @@ describe('LoginPage', () => {
     mockLogin.mockResolvedValue(undefined)
     render(<LoginPage />)
 
-    const emailInput = screen.getByLabelText('Email')
-    const passwordInput = screen.getByLabelText('Password')
+    const textboxes = screen.getAllByRole('textbox')
+    const emailInput = textboxes[0] // First textbox is email
+    const passwordInput = screen.getByLabelText(/password/i) // Password field
     const submitButton = screen.getByRole('button', { name: /sign in$/i })
 
     fireEvent.change(emailInput, { target: { value: 'admin@atiwebportal.com' } })
@@ -96,8 +100,9 @@ describe('LoginPage', () => {
   it('shows error for invalid credentials', async () => {
     render(<LoginPage />)
 
-    const emailInput = screen.getByLabelText('Email')
-    const passwordInput = screen.getByLabelText('Password')
+    const textboxes = screen.getAllByRole('textbox')
+    const emailInput = textboxes[0]
+    const passwordInput = screen.getByLabelText(/password/i)
     const submitButton = screen.getByRole('button', { name: /sign in$/i })
 
     fireEvent.change(emailInput, { target: { value: 'invalid@email.com' } })
@@ -125,8 +130,8 @@ describe('LoginPage', () => {
     mockLogin.mockImplementation(() => new Promise(resolve => setTimeout(resolve, 100)))
     render(<LoginPage />)
 
-    const adminUser = screen.getByText('Admin User').closest('[role="button"]')
-    fireEvent.click(adminUser!)
+    const adminUser = screen.getByText('admin@atiwebportal.com')
+    fireEvent.click(adminUser)
 
     expect(screen.getByText('Signing in...')).toBeInTheDocument()
 

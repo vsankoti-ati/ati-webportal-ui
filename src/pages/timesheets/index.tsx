@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import { useQuery } from 'react-query';
 import { fetchMyTimesheets } from '@/services/timesheetService';
+import { useEmployeeData } from '@/hooks/useEmployee';
 import { Timesheet } from '@/types/timesheet';
 import AddIcon from '@mui/icons-material/Add';
 import { useRouter } from 'next/router';
@@ -39,7 +40,15 @@ const getStatusColor = (status: Timesheet['status']) => {
 
 export default function TimesheetList() {
   const router = useRouter();
-  const { data: timesheets, isLoading } = useQuery('my-timesheets', fetchMyTimesheets);
+  const { employeeData } = useEmployeeData();
+  
+  const { data: timesheets, isLoading } = useQuery(
+    ['my-timesheets', employeeData?.id], 
+    () => fetchMyTimesheets(employeeData?.id),
+    {
+      enabled: !!employeeData?.id
+    }
+  );
 
   const handleCreate = () => {
     router.push('/timesheets/new');
@@ -55,7 +64,7 @@ export default function TimesheetList() {
         <Layout>
           <div>Loading...</div>
         </Layout>
-      </ProtectedRoute>
+       </ProtectedRoute>
     );
   }
 
@@ -90,21 +99,21 @@ export default function TimesheetList() {
           </TableHead>
           <TableBody>
             {timesheets?.map((timesheet) => {
-              const totalHours = timesheet.time_entries?.reduce(
-                (sum, entry) => sum + entry.hours_worked,
+              const totalHours = timesheet.timeEntries?.reduce(
+                (sum, entry) => sum + entry.hoursWorked,
                 0
               ) || 0;
 
               return (
                 <TableRow key={timesheet.id}>
                   <TableCell>
-                    {format(new Date(timesheet.start_date), 'MMM d, yyyy')} -{' '}
-                    {format(new Date(timesheet.end_date), 'MMM d, yyyy')}
+                    {format(new Date(timesheet.startDate), 'MMM d, yyyy')} -{' '}
+                    {format(new Date(timesheet.endDate), 'MMM d, yyyy')}
                   </TableCell>
                   <TableCell>{totalHours}</TableCell>
                   <TableCell>
-                    {timesheet.submission_date
-                      ? format(new Date(timesheet.submission_date), 'MMM d, yyyy')
+                    {timesheet.submissionDate
+                      ? format(new Date(timesheet.submissionDate), 'MMM d, yyyy')
                       : '-'}
                   </TableCell>
                   <TableCell>
@@ -138,13 +147,6 @@ export default function TimesheetList() {
       </TableContainer>
         </Container>
       </Layout>
-    </ProtectedRoute>
+     </ProtectedRoute>
   );
-}
-
-// Force server-side rendering to prevent static generation issues
-export async function getServerSideProps() {
-  return {
-    props: {},
-  };
 }

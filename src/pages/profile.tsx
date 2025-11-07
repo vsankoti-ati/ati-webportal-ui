@@ -28,6 +28,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import Layout from '@/components/Layout';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { employeeService, Employee } from '@/services/employee';
 
 interface EmployeeProfile {
   id: string;
@@ -37,87 +38,80 @@ interface EmployeeProfile {
   phone: string;
   department: string;
   position: string;
-  manager: string;
+  manager?: string;
   hireDate: string;
   employeeId: string;
   address: string;
+  addressLine2?: string;
   city: string;
   state: string;
   zipCode: string;
-  emergencyContact: string;
-  emergencyPhone: string;
-  skills: string[];
+  emergencyContact?: string;
+  emergencyPhone?: string;
+  skills?: string[];
+  comment?: string;
 }
 
-// Mock API service
-const profileService = {
-  getProfile: async (userId: string): Promise<EmployeeProfile> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Mock profile data based on user
-    const mockProfiles: Record<string, EmployeeProfile> = {
-      'admin-user-001': {
-        id: 'admin-user-001',
-        firstName: 'Admin',
-        lastName: 'User',
-        email: 'admin@atiwebportal.com',
-        phone: '+1 (555) 123-4567',
-        department: 'IT Administration',
-        position: 'System Administrator',
-        manager: 'CEO',
-        hireDate: '2023-01-15',
-        employeeId: 'ATI001',
-        address: '123 Tech Street',
-        city: 'San Francisco',
-        state: 'CA',
-        zipCode: '94105',
-        emergencyContact: 'Jane Admin',
-        emergencyPhone: '+1 (555) 987-6543',
-        skills: ['System Administration', 'Cloud Computing', 'Security', 'Network Management']
-      },
-      'employee-user-001': {
-        id: 'employee-user-001',
-        firstName: 'John',
-        lastName: 'Employee',
-        email: 'employee@atiwebportal.com',
-        phone: '+1 (555) 234-5678',
-        department: 'Software Development',
-        position: 'Senior Developer',
-        manager: 'Tech Lead',
-        hireDate: '2023-03-10',
-        employeeId: 'ATI002',
-        address: '456 Code Avenue',
-        city: 'Austin',
-        state: 'TX',
-        zipCode: '78701',
-        emergencyContact: 'Mary Employee',
-        emergencyPhone: '+1 (555) 876-5432',
-        skills: ['React', 'TypeScript', 'Node.js', 'AWS', 'MongoDB']
-      }
-    };
+// Helper function to convert API Employee to EmployeeProfile format
+const mapEmployeeToProfile = (employee: Employee): EmployeeProfile => {
+  return {
+    id: employee.id,
+    firstName: employee.firstName,
+    lastName: employee.lastName,
+    email: employee.emailId,
+    phone: employee.phoneNumber,
+    department: '', // Not in API model, could be derived from role
+    position: employee.role,
+    manager: undefined, // Not in current API model
+    hireDate: employee.hireDate,
+    employeeId: `ATI${employee.id.padStart(3, '0')}`,
+    address: employee.addressLine1,
+    addressLine2: employee.addressLine2,
+    city: employee.city,
+    state: employee.state,
+    zipCode: employee.zipCode,
+    emergencyContact: undefined, // Not in current API model
+    emergencyPhone: undefined, // Not in current API model
+    skills: [], // Not in current API model
+    comment: employee.comment,
+  };
+};
 
-    const profile = mockProfiles[userId];
-    if (!profile) {
-      throw new Error('Profile not found');
-    }
-    return profile;
+// Helper function to convert EmployeeProfile updates to API format
+const mapProfileToEmployee = (profile: Partial<EmployeeProfile>) => {
+  const updates: any = {};
+  
+  if (profile.firstName !== undefined) updates.firstName = profile.firstName;
+  if (profile.lastName !== undefined) updates.lastName = profile.lastName;
+  if (profile.email !== undefined) updates.emailId = profile.email;
+  if (profile.phone !== undefined) updates.phoneNumber = profile.phone;
+  if (profile.position !== undefined) updates.role = profile.position;
+  if (profile.hireDate !== undefined) updates.hireDate = profile.hireDate;
+  if (profile.address !== undefined) updates.addressLine1 = profile.address;
+  if (profile.addressLine2 !== undefined) updates.addressLine2 = profile.addressLine2;
+  if (profile.city !== undefined) updates.city = profile.city;
+  if (profile.state !== undefined) updates.state = profile.state;
+  if (profile.zipCode !== undefined) updates.zipCode = profile.zipCode;
+  if (profile.comment !== undefined) updates.comment = profile.comment;
+  if (profile.id !== undefined) updates.id = profile.id;
+  //if(profile.employeeId !== undefined) updates.employeeId = profile.employeeId;
+  // --- IGNORE ---
+
+  return updates;
+};
+
+// Profile service using actual API
+const profileService = {
+  getProfileByEmail: async (email: string): Promise<EmployeeProfile> => {
+    const employee = await employeeService.getByEmail(email);
+    return mapEmployeeToProfile(employee);
   },
 
-  updateProfile: async (userId: string, profileData: Partial<EmployeeProfile>): Promise<EmployeeProfile> => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Simulate random success/failure for demo
-    if (Math.random() > 0.8) {
-      throw new Error('Update failed: Server error occurred');
-    }
-    
-    console.log('Profile updated successfully:', profileData);
-    
-    // Return updated profile (in real app, this would come from the server)
-    const currentProfile = await profileService.getProfile(userId);
-    return { ...currentProfile, ...profileData };
+  updateProfile: async (profileId: string, profileData: Partial<EmployeeProfile>): Promise<EmployeeProfile> => {
+    const updates = mapProfileToEmployee(profileData);
+    //const employeeId = parseInt(profileId);
+    const updatedEmployee = await employeeService.update(profileId, updates);
+    return mapEmployeeToProfile(updatedEmployee);
   }
 };
 
@@ -135,15 +129,30 @@ export default function ProfilePage() {
   }, [user]);
 
   const loadProfile = async () => {
-    if (!user) return;
+    if (!user || !user.email) {
+      console.error('User or user email not found:', user);
+      setMessage({ 
+        type: 'error', 
+        text: 'User email not found. Please log in again.' 
+      });
+      setLoading(false);
+      return;
+    }
     
     try {
       setLoading(true);
-      const profileData = await profileService.getProfile(user.id);
+      console.log('Loading profile for email:', user.email);
+      const profileData = await profileService.getProfileByEmail(user.email);
+      console.log('Profile loaded successfully:', profileData);
       setProfile(profileData);
       setEditedProfile(profileData);
-    } catch (error) {
-      setMessage({ type: 'error', text: 'Failed to load profile data' });
+      setMessage(null); // Clear any previous error messages
+    } catch (error: any) {
+      console.error('Failed to load profile:', error);
+      setMessage({ 
+        type: 'error', 
+        text: error.message || error.response?.data?.message || 'Failed to load profile data' 
+      });
     } finally {
       setLoading(false);
     }
@@ -167,13 +176,17 @@ export default function ProfilePage() {
       setSaving(true);
       setMessage(null);
       
-      const updatedProfile = await profileService.updateProfile(user.id, editedProfile);
+      const updatedProfile = await profileService.updateProfile(editedProfile.id, editedProfile);
       setProfile(updatedProfile);
       setEditedProfile(updatedProfile);
       setIsEditing(false);
       setMessage({ type: 'success', text: 'Profile updated successfully!' });
     } catch (error: any) {
-      setMessage({ type: 'error', text: error.message || 'Failed to update profile' });
+      console.error('Failed to update profile:', error);
+      setMessage({ 
+        type: 'error', 
+        text: error.response?.data?.message || error.message || 'Failed to update profile' 
+      });
     } finally {
       setSaving(false);
     }
@@ -236,7 +249,7 @@ export default function ProfilePage() {
                     {currentProfile.firstName} {currentProfile.lastName}
                   </Typography>
                   <Typography variant="h6" color="text.secondary" gutterBottom>
-                    {currentProfile.position} • {currentProfile.department}
+                    {currentProfile.position}{currentProfile.department ? ` • ${currentProfile.department}` : ''}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     Employee ID: {currentProfile.employeeId} • Joined: {new Date(currentProfile.hireDate).toLocaleDateString()}
@@ -366,20 +379,22 @@ export default function ProfilePage() {
                         <TextField
                           fullWidth
                           label="Department"
-                          value={currentProfile.department}
+                          value={currentProfile.department || ''}
                           onChange={(e) => handleInputChange('department', e.target.value)}
                           disabled={!isEditing}
                           margin="dense"
+                          placeholder="Not specified"
                         />
                       </Grid>
                       <Grid item xs={12}>
                         <TextField
                           fullWidth
                           label="Manager"
-                          value={currentProfile.manager}
+                          value={currentProfile.manager || ''}
                           onChange={(e) => handleInputChange('manager', e.target.value)}
                           disabled={!isEditing}
                           margin="dense"
+                          placeholder="Not specified"
                         />
                       </Grid>
                       <Grid item xs={12}>
@@ -413,11 +428,22 @@ export default function ProfilePage() {
                       <Grid item xs={12}>
                         <TextField
                           fullWidth
-                          label="Address"
+                          label="Address Line 1"
                           value={currentProfile.address}
                           onChange={(e) => handleInputChange('address', e.target.value)}
                           disabled={!isEditing}
                           margin="dense"
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Address Line 2 (Optional)"
+                          value={currentProfile.addressLine2 || ''}
+                          onChange={(e) => handleInputChange('addressLine2', e.target.value)}
+                          disabled={!isEditing}
+                          margin="dense"
+                          placeholder="Apt, Suite, etc."
                         />
                       </Grid>
                       <Grid item xs={6}>
@@ -469,20 +495,22 @@ export default function ProfilePage() {
                         <TextField
                           fullWidth
                           label="Emergency Contact Name"
-                          value={currentProfile.emergencyContact}
+                          value={currentProfile.emergencyContact || ''}
                           onChange={(e) => handleInputChange('emergencyContact', e.target.value)}
                           disabled={!isEditing}
                           margin="dense"
+                          placeholder="Not specified"
                         />
                       </Grid>
                       <Grid item xs={12}>
                         <TextField
                           fullWidth
                           label="Emergency Contact Phone"
-                          value={currentProfile.emergencyPhone}
+                          value={currentProfile.emergencyPhone || ''}
                           onChange={(e) => handleInputChange('emergencyPhone', e.target.value)}
                           disabled={!isEditing}
                           margin="dense"
+                          placeholder="Not specified"
                         />
                       </Grid>
                     </Grid>
@@ -500,7 +528,7 @@ export default function ProfilePage() {
                       <TextField
                         fullWidth
                         label="Skills (comma-separated)"
-                        value={currentProfile.skills.join(', ')}
+                        value={(currentProfile.skills || []).join(', ')}
                         onChange={(e) => handleSkillsChange(e.target.value)}
                         margin="dense"
                         multiline
@@ -509,11 +537,38 @@ export default function ProfilePage() {
                       />
                     ) : (
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                        {currentProfile.skills.map((skill, index) => (
-                          <Chip key={index} label={skill} variant="outlined" />
-                        ))}
+                        {(currentProfile.skills && currentProfile.skills.length > 0) ? (
+                          currentProfile.skills.map((skill, index) => (
+                            <Chip key={index} label={skill} variant="outlined" />
+                          ))
+                        ) : (
+                          <Typography variant="body2" color="text.secondary">
+                            No skills specified
+                          </Typography>
+                        )}
                       </Box>
                     )}
+                  </CardContent>
+                </Card>
+
+                <Card sx={{ mt: 2 }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      Additional Notes
+                    </Typography>
+                    <Divider sx={{ mb: 2 }} />
+                    
+                    <TextField
+                      fullWidth
+                      label="Comments/Notes"
+                      value={currentProfile.comment || ''}
+                      onChange={(e) => handleInputChange('comment', e.target.value)}
+                      disabled={!isEditing}
+                      margin="dense"
+                      multiline
+                      rows={4}
+                      placeholder="Additional information or notes"
+                    />
                   </CardContent>
                 </Card>
               </Grid>
@@ -523,11 +578,4 @@ export default function ProfilePage() {
       </Layout>
     </ProtectedRoute>
   );
-}
-
-// Force server-side rendering to prevent static generation issues
-export async function getServerSideProps() {
-  return {
-    props: {},
-  };
 }

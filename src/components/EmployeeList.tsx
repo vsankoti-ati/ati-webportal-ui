@@ -55,11 +55,11 @@ export default function EmployeeList() {
     }
   };
 
-  const handleEdit = (id: number) => {
+  const handleEdit = (id: string) => {
     router.push(`/employee/edit/${id}`);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Are you sure you want to delete this employee?')) {
       try {
         await employeeService.delete(id);
@@ -169,11 +169,11 @@ export default function EmployeeList() {
                   <TableCell>
                     <Box display="flex" alignItems="center" gap={2}>
                       <Avatar sx={{ bgcolor: 'primary.main' }}>
-                        {getInitials(employee.first_name, employee.last_name)}
+                        {getInitials(employee.firstName, employee.lastName)}
                       </Avatar>
                       <Box>
                         <Typography variant="body1" fontWeight="medium">
-                          {`${employee.first_name} ${employee.last_name}`}
+                          {`${employee.firstName} ${employee.lastName}`}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
                           ID: {employee.id}
@@ -183,10 +183,10 @@ export default function EmployeeList() {
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2">
-                      {employee.email_id}
+                      {employee.emailId}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {employee.phone_number}
+                      {employee.phoneNumber}
                     </Typography>
                   </TableCell>
                   <TableCell>
@@ -201,13 +201,13 @@ export default function EmployeeList() {
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2">
-                      {format(new Date(employee.hire_date), 'MMM dd, yyyy')}
+                      {format(new Date(employee.hireDate), 'MMM dd, yyyy')}
                     </Typography>
                   </TableCell>
                   <TableCell>
                     <Chip
-                      label={employee.is_active ? 'Active' : 'Inactive'}
-                      color={employee.is_active ? 'success' : 'default'}
+                      label={employee.isActive ? 'Active' : 'Inactive'}
+                      color={employee.isActive ? 'success' : 'default'}
                       size="small"
                       variant="filled"
                     />

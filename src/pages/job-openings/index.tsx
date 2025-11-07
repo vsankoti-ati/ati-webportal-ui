@@ -130,10 +130,3 @@ export default function JobOpeningsList() {
     </ProtectedRoute>
   );
 }
-
-// Force server-side rendering to prevent static generation issues
-export async function getServerSideProps() {
-  return {
-    props: {},
-  };
-}

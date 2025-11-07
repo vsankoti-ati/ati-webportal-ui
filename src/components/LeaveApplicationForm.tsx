@@ -19,7 +19,7 @@ import { leaveService } from '../services/leave';
 interface LeaveApplicationFormProps {
   open: boolean;
   onClose: () => void;
-  employeeId: number;
+  employeeId: string;
   onSubmit: () => void;
 }
 

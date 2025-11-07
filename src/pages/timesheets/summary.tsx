@@ -49,10 +49,3 @@ export default function TimesheetSummaryPage() {
     </ProtectedRoute>
   );
 }
-
-// Force server-side rendering to prevent static generation issues
-export async function getServerSideProps() {
-  return {
-    props: {},
-  };
-}

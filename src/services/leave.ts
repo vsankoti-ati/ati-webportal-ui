@@ -9,7 +9,7 @@ const useMockData = process.env.NEXT_PUBLIC_SKIP_MSAL === 'true' ||
 
 export interface Leave {
   id: number;
-  employee_id: number;
+  employee_id: string;
   leave_type: string;
   leave_balance: number;
   employee: {
@@ -21,7 +21,7 @@ export interface Leave {
 
 export interface LeaveApplication {
   id: number;
-  employee_id: number;
+  employee_id: string;
   from_date: string;
   to_date: string;
   applied_date: string;
@@ -36,7 +36,7 @@ export interface LeaveApplication {
 
 export const leaveService = {
   // Leave balance endpoints
-  async getLeaveBalance(employeeId: number): Promise<Leave[]> {
+  async getLeaveBalance(employeeId: string): Promise<Leave[]> {
     if (useMockData) {
       console.log('Using mock data for leave balance');
       return mockLeaveService.getLeaveBalance(employeeId);
@@ -64,7 +64,7 @@ export const leaveService = {
     return response.data;
   },
 
-  async getEmployeeApplications(employeeId: number): Promise<LeaveApplication[]> {
+  async getEmployeeApplications(employeeId: string): Promise<LeaveApplication[]> {
     if (useMockData) {
       console.log('Using mock data for employee applications');
       return mockLeaveService.getEmployeeApplications(employeeId);
@@ -74,7 +74,7 @@ export const leaveService = {
   },
 
   async createApplication(application: {
-    employee_id: number;
+    employee_id: string;
     from_date: string;
     to_date: string;
     comment?: string;

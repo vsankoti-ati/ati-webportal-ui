@@ -13,7 +13,7 @@ import {
 import { Leave, leaveService } from '../services/leave';
 
 interface LeaveBalanceProps {
-  employeeId: number;
+  employeeId: string;
 }
 
 export default function LeaveBalance({ employeeId }: LeaveBalanceProps) {

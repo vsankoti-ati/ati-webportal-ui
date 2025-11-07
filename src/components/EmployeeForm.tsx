@@ -24,18 +24,18 @@ interface EmployeeFormProps {
 export default function EmployeeForm({ employee, isEdit = false }: EmployeeFormProps) {
   const router = useRouter();
   const [formData, setFormData] = useState<CreateEmployeeDto>({
-    first_name: '',
-    last_name: '',
+    firstName: '',
+    lastName: '',
     role: '',
-    email_id: '',
-    address_line_1: '',
-    address_line_2: '',
+    emailId: '',
+    addressLine1: '',
+    addressLine2: '',
     city: '',
     state: '',
-    zip_code: '',
-    phone_number: '',
-    hire_date: new Date().toISOString().split('T')[0],
-    is_active: true,
+    zipCode: '',
+    phoneNumber: '',
+    hireDate: new Date().toISOString().split('T')[0],
+    isActive: true,
     comment: '',
   });
 
@@ -44,8 +44,19 @@ export default function EmployeeForm({ employee, isEdit = false }: EmployeeFormP
   useEffect(() => {
     if (employee) {
       setFormData({
-        ...employee,
-        hire_date: new Date(employee.hire_date).toISOString().split('T')[0],
+        firstName: employee.firstName,
+        lastName: employee.lastName,
+        role: employee.role,
+        emailId: employee.emailId,
+        addressLine1: employee.addressLine1,
+        addressLine2: employee.addressLine2,
+        city: employee.city,
+        state: employee.state,
+        zipCode: employee.zipCode,
+        phoneNumber: employee.phoneNumber,
+        hireDate: new Date(employee.hireDate).toISOString().split('T')[0],
+        isActive: employee.isActive,
+        comment: employee.comment,
       });
     }
   }, [employee]);
@@ -53,16 +64,16 @@ export default function EmployeeForm({ employee, isEdit = false }: EmployeeFormP
   const validateForm = () => {
     const newErrors: Partial<Record<keyof CreateEmployeeDto, string>> = {};
     
-    if (!formData.first_name) newErrors.first_name = 'First name is required';
-    if (!formData.last_name) newErrors.last_name = 'Last name is required';
+    if (!formData.firstName) newErrors.firstName = 'First name is required';
+    if (!formData.lastName) newErrors.lastName = 'Last name is required';
     if (!formData.role) newErrors.role = 'Role is required';
-    if (!formData.email_id) newErrors.email_id = 'Email is required';
-    if (!formData.address_line_1) newErrors.address_line_1 = 'Address is required';
+    if (!formData.emailId) newErrors.emailId = 'Email is required';
+    if (!formData.addressLine1) newErrors.addressLine1 = 'Address is required';
     if (!formData.city) newErrors.city = 'City is required';
     if (!formData.state) newErrors.state = 'State is required';
-    if (!formData.zip_code) newErrors.zip_code = 'ZIP code is required';
-    if (!formData.phone_number) newErrors.phone_number = 'Phone number is required';
-    if (!formData.hire_date) newErrors.hire_date = 'Hire date is required';
+    if (!formData.zipCode) newErrors.zipCode = 'ZIP code is required';
+    if (!formData.phoneNumber) newErrors.phoneNumber = 'Phone number is required';
+    if (!formData.hireDate) newErrors.hireDate = 'Hire date is required';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -116,22 +127,22 @@ export default function EmployeeForm({ employee, isEdit = false }: EmployeeFormP
             <TextField
               fullWidth
               label="First Name"
-              name="first_name"
-              value={formData.first_name}
+              name="firstName"
+              value={formData.firstName}
               onChange={handleChange}
-              error={!!errors.first_name}
-              helperText={errors.first_name}
+              error={!!errors.firstName}
+              helperText={errors.firstName}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
               label="Last Name"
-              name="last_name"
-              value={formData.last_name}
+              name="lastName"
+              value={formData.lastName}
               onChange={handleChange}
-              error={!!errors.last_name}
-              helperText={errors.last_name}
+              error={!!errors.lastName}
+              helperText={errors.lastName}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
@@ -154,31 +165,31 @@ export default function EmployeeForm({ employee, isEdit = false }: EmployeeFormP
             <TextField
               fullWidth
               label="Email"
-              name="email_id"
+              name="emailId"
               type="email"
-              value={formData.email_id}
+              value={formData.emailId}
               onChange={handleChange}
-              error={!!errors.email_id}
-              helperText={errors.email_id}
+              error={!!errors.emailId}
+              helperText={errors.emailId}
             />
           </Grid>
           <Grid item xs={12}>
             <TextField
               fullWidth
               label="Address Line 1"
-              name="address_line_1"
-              value={formData.address_line_1}
+              name="addressLine1"
+              value={formData.addressLine1}
               onChange={handleChange}
-              error={!!errors.address_line_1}
-              helperText={errors.address_line_1}
+              error={!!errors.addressLine1}
+              helperText={errors.addressLine1}
             />
           </Grid>
           <Grid item xs={12}>
             <TextField
               fullWidth
               label="Address Line 2"
-              name="address_line_2"
-              value={formData.address_line_2}
+              name="addressLine2"
+              value={formData.addressLine2}
               onChange={handleChange}
             />
           </Grid>
@@ -208,34 +219,34 @@ export default function EmployeeForm({ employee, isEdit = false }: EmployeeFormP
             <TextField
               fullWidth
               label="ZIP Code"
-              name="zip_code"
-              value={formData.zip_code}
+              name="zipCode"
+              value={formData.zipCode}
               onChange={handleChange}
-              error={!!errors.zip_code}
-              helperText={errors.zip_code}
+              error={!!errors.zipCode}
+              helperText={errors.zipCode}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
               label="Phone Number"
-              name="phone_number"
-              value={formData.phone_number}
+              name="phoneNumber"
+              value={formData.phoneNumber}
               onChange={handleChange}
-              error={!!errors.phone_number}
-              helperText={errors.phone_number}
+              error={!!errors.phoneNumber}
+              helperText={errors.phoneNumber}
             />
           </Grid>
           <Grid item xs={12} sm={6}>
             <TextField
               fullWidth
               label="Hire Date"
-              name="hire_date"
+              name="hireDate"
               type="date"
-              value={formData.hire_date}
+              value={formData.hireDate}
               onChange={handleChange}
-              error={!!errors.hire_date}
-              helperText={errors.hire_date}
+              error={!!errors.hireDate}
+              helperText={errors.hireDate}
               InputLabelProps={{ shrink: true }}
             />
           </Grid>

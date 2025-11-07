@@ -17,16 +17,32 @@ import { CreateTimesheetDto } from '@/types/timesheet';
 import { startOfWeek, endOfWeek, format } from 'date-fns';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import Layout from '@/components/Layout';
+import { useAuth } from '@/hooks/useAuth';
+import { useEmployeeData } from '@/hooks/useEmployee';
 
 export default function NewTimesheet() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { user } = useAuth(); // Get the logged-in user
+  const { employeeData, isLoading: isLoadingEmployee, error: employeeError } = useEmployeeData(); // Get employee data
+  
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
   } = useForm<CreateTimesheetDto>();
+
+  // Now you can access user details:
+  // user.id - User ID
+  // user.name - User's name
+  // user.email - User's email
+  // user.roles - Array of user roles
+  // user.department - User's department (optional)
+  // employeeData - Complete employee information from the API
+  
+  console.log('Logged in user:', user);
+  console.log('Employee data:', employeeData);
 
   const createMutation = useMutation(createTimesheet, {
     onSuccess: () => {
@@ -38,11 +54,19 @@ export default function NewTimesheet() {
   // Set default dates to current week
   React.useEffect(() => {
     const now = new Date();
-    setValue('start_date', format(startOfWeek(now), 'yyyy-MM-dd'));
-    setValue('end_date', format(endOfWeek(now), 'yyyy-MM-dd'));
+    setValue('startDate', format(startOfWeek(now), 'yyyy-MM-dd'));
+    setValue('endDate', format(endOfWeek(now), 'yyyy-MM-dd'));
   }, [setValue]);
 
   const onSubmit = (data: CreateTimesheetDto) => {
+    // Get employee ID from employee data and assign to data.employeeId
+    if (employeeData?.id) {
+      data.employeeId = employeeData.id;
+      console.log('Assigning employee ID to timesheet:', employeeData.id);
+    } else {
+      console.warn('Employee data not available, cannot assign employee ID');
+    }
+    
     createMutation.mutate(data);
   };
 
@@ -62,29 +86,35 @@ export default function NewTimesheet() {
         </Alert>
       )}
 
+      {employeeError && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          Employee data not available: {employeeError}. Timesheet may not be properly associated with your employee record.
+        </Alert>
+      )}
+
       <Paper sx={{ p: 3 }}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
               <TextField
-                {...register('start_date', { required: 'Start date is required' })}
+                {...register('startDate', { required: 'Start date is required' })}
                 label="Start Date"
                 type="date"
                 fullWidth
                 InputLabelProps={{ shrink: true }}
-                error={!!errors.start_date}
-                helperText={errors.start_date?.message}
+                error={!!errors.startDate}
+                helperText={errors.startDate?.message}
               />
             </Grid>
             <Grid item xs={12} md={6}>
               <TextField
-                {...register('end_date', { required: 'End date is required' })}
+                {...register('endDate', { required: 'End date is required' })}
                 label="End Date"
                 type="date"
                 fullWidth
                 InputLabelProps={{ shrink: true }}
-                error={!!errors.end_date}
-                helperText={errors.end_date?.message}
+                error={!!errors.endDate}
+                helperText={errors.endDate?.message}
               />
             </Grid>
           </Grid>
@@ -100,9 +130,12 @@ export default function NewTimesheet() {
               type="submit"
               variant="contained"
               color="primary"
-              disabled={createMutation.isLoading}
+              disabled={createMutation.isLoading || isLoadingEmployee || !employeeData}
             >
-              {createMutation.isLoading ? 'Creating...' : 'Create Timesheet'}
+              {createMutation.isLoading ? 'Creating...' : 
+               isLoadingEmployee ? 'Loading Employee Data...' :
+               !employeeData ? 'Employee Data Required' :
+               'Create Timesheet'}
             </Button>
           </Box>
         </form>
@@ -111,11 +144,4 @@ export default function NewTimesheet() {
       </Layout>
     </ProtectedRoute>
   );
-}
-
-// Force server-side rendering to prevent static generation issues
-export async function getServerSideProps() {
-  return {
-    props: {},
-  };
 }

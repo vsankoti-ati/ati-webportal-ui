@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import { useQuery } from 'react-query';
 import { fetchMyTimesheets } from '@/services/timesheetService';
+import { useEmployeeData } from '@/hooks/useEmployee';
 import {
   startOfWeek,
   endOfWeek,
@@ -41,7 +42,15 @@ interface DailySummary {
 }
 
 export default function WeeklySummary({ startDate, endDate }: WeeklySummaryProps) {
-  const { data: timesheets } = useQuery('my-timesheets', fetchMyTimesheets);
+  const { employeeData } = useEmployeeData();
+  
+  const { data: timesheets } = useQuery(
+    ['my-timesheets', employeeData?.id], 
+    () => fetchMyTimesheets(employeeData?.id),
+    {
+      enabled: !!employeeData?.id
+    }
+  );
 
   const weekDays = eachDayOfInterval({ start: startDate, end: endDate });
 
@@ -54,19 +63,19 @@ export default function WeeklySummary({ startDate, endDate }: WeeklySummaryProps
     };
 
     timesheets?.forEach(timesheet => {
-      timesheet.time_entries?.forEach(entry => {
-        const entryDate = parseISO(entry.entry_date);
+      timesheet.timeEntries?.forEach(entry => {
+        const entryDate = parseISO(entry.entryDate);
         if (isSameDay(date, entryDate)) {
-          summary.totalHours += entry.hours_worked;
-          
+          summary.totalHours += entry.hoursWorked;
+
           // Add or update project entry
           const existingEntry = summary.entries.find(e => e.project === entry.project?.name);
           if (existingEntry) {
-            existingEntry.hours += entry.hours_worked;
+            existingEntry.hours += entry.hoursWorked;
           } else {
             summary.entries.push({
               project: entry.project?.name || 'Unknown Project',
-              hours: entry.hours_worked,
+              hours: entry.hoursWorked,
             });
           }
         }

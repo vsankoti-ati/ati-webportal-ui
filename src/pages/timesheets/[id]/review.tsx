@@ -99,7 +99,7 @@ export default function TimesheetReview() {
   };
 
   const totalHours = timeEntries?.reduce(
-    (sum, entry) => sum + entry.hours_worked,
+    (sum, entry) => sum + entry.hoursWorked,
     0
   ) || 0;
 
@@ -169,7 +169,7 @@ export default function TimesheetReview() {
                   Employee
                 </Typography>
                 <Typography>
-                  {timesheet.employee?.first_name} {timesheet.employee?.last_name}
+                  {timesheet.employee?.firstName} {timesheet.employee?.lastName}
                 </Typography>
               </Box>
               <Box>
@@ -177,8 +177,8 @@ export default function TimesheetReview() {
                   Period
                 </Typography>
                 <Typography>
-                  {format(new Date(timesheet.start_date), 'MMM d, yyyy')} -{' '}
-                  {format(new Date(timesheet.end_date), 'MMM d, yyyy')}
+                  {format(new Date(timesheet.startDate), 'MMM d, yyyy')} -{' '}
+                  {format(new Date(timesheet.endDate), 'MMM d, yyyy')}
                 </Typography>
               </Box>
               <Box>
@@ -207,8 +207,8 @@ export default function TimesheetReview() {
                   Submission Date
                 </Typography>
                 <Typography>
-                  {timesheet.submission_date 
-                    ? format(new Date(timesheet.submission_date), 'MMM d, yyyy')
+                  {timesheet.submissionDate
+                    ? format(new Date(timesheet.submissionDate), 'MMM d, yyyy')
                     : 'Not submitted'
                   }
                 </Typography>
@@ -275,12 +275,12 @@ export default function TimesheetReview() {
                 {timeEntries?.map((entry) => (
                   <TableRow key={entry.id}>
                     <TableCell>
-                      {format(new Date(entry.entry_date), 'MMM d, yyyy')}
+                      {format(new Date(entry.entryDate), 'MMM d, yyyy')}
                     </TableCell>
                     <TableCell>{entry.project?.name}</TableCell>
-                    <TableCell>{entry.hours_worked}</TableCell>
+                    <TableCell>{entry.hoursWorked}</TableCell>
                     <TableCell>
-                      {entry.start_time} - {entry.end_time}
+                      {entry.startTime} - {entry.endTime}
                     </TableCell>
                     <TableCell>{entry.notes || '-'}</TableCell>
                   </TableRow>
@@ -301,11 +301,4 @@ export default function TimesheetReview() {
       </Layout>
     </ProtectedRoute>
   );
-}
-
-// Force server-side rendering to prevent static generation issues
-export async function getServerSideProps() {
-  return {
-    props: {},
-  };
 }

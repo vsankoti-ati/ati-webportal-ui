@@ -189,10 +189,3 @@ export default function JobOpeningDetails() {
     </ProtectedRoute>
   );
 }
-
-// Force server-side rendering to prevent static generation issues
-export async function getServerSideProps() {
-  return {
-    props: {},
-  };
-}

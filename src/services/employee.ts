@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { api } from '@/lib/api';
 import { mockEmployeeService } from './mockJobEmployeeData';
 
 // Helper function to check if we should use mock data (evaluated at runtime)
@@ -7,40 +7,81 @@ const shouldUseMockData = () => {
          (process.env.NODE_ENV === 'development' && !process.env.NEXT_PUBLIC_API_URL);
 };
 
-const getApiUrl = () => process.env.NEXT_PUBLIC_API_URL;
+// Helper function to transform API response (snake_case) to Employee interface (camelCase)
+const transformToEmployee = (apiEmployee: any): Employee => {
+  return {
+    id: apiEmployee.id,
+    firstName: apiEmployee.firstName || apiEmployee.first_name,
+    lastName: apiEmployee.lastName || apiEmployee.last_name,
+    role: apiEmployee.role,
+    emailId: apiEmployee.email || apiEmployee.email_id,
+    addressLine1: apiEmployee.addressLine1 || apiEmployee.address_line_1,
+    addressLine2: apiEmployee.addressLine2 || apiEmployee.address_line_2,
+    city: apiEmployee.city,
+    state: apiEmployee.state,
+    zipCode: apiEmployee.zipCode || apiEmployee.zip_code,
+    phoneNumber: apiEmployee.phoneNumber || apiEmployee.phone_number,
+    hireDate: apiEmployee.hireDate || apiEmployee.hire_date,
+    isActive: apiEmployee.isActive !== undefined ? apiEmployee.isActive : apiEmployee.is_active,
+    comment: apiEmployee.comment,
+    createdAt: apiEmployee.createdAt || apiEmployee.created_at,
+    updatedAt: apiEmployee.updatedAt || apiEmployee.updated_at,
+  };
+};
+
+// Helper function to transform CreateEmployeeDto (camelCase) to API format (snake_case)
+const transformToApiFormat = (employee: Partial<CreateEmployeeDto>): any => {
+  const apiFormat: any = {};
+  
+  if (employee.firstName !== undefined) apiFormat.first_name = employee.firstName;
+  if (employee.lastName !== undefined) apiFormat.last_name = employee.lastName;
+  if (employee.role !== undefined) apiFormat.role = employee.role;
+  if (employee.emailId !== undefined) apiFormat.email_id = employee.emailId;
+  if (employee.addressLine1 !== undefined) apiFormat.address_line_1 = employee.addressLine1;
+  if (employee.addressLine2 !== undefined) apiFormat.address_line_2 = employee.addressLine2;
+  if (employee.city !== undefined) apiFormat.city = employee.city;
+  if (employee.state !== undefined) apiFormat.state = employee.state;
+  if (employee.zipCode !== undefined) apiFormat.zip_code = employee.zipCode;
+  if (employee.phoneNumber !== undefined) apiFormat.phone_number = employee.phoneNumber;
+  if (employee.hireDate !== undefined) apiFormat.hire_date = employee.hireDate;
+  if (employee.isActive !== undefined) apiFormat.is_active = employee.isActive;
+  if (employee.comment !== undefined) apiFormat.comment = employee.comment;
+  
+  return apiFormat;
+};
 
 export interface Employee {
-  id: number;
-  first_name: string;
-  last_name: string;
+  id: string;
+  firstName: string;
+  lastName: string;
   role: string;
-  email_id: string;
-  address_line_1: string;
-  address_line_2?: string;
+  emailId: string;
+  addressLine1: string;
+  addressLine2?: string;
   city: string;
   state: string;
-  zip_code: string;
-  phone_number: string;
-  hire_date: string;
-  is_active: boolean;
+  zipCode: string;
+  phoneNumber: string;
+  hireDate: string;
+  isActive: boolean;
   comment?: string;
-  created_at: string;
-  updated_at: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateEmployeeDto {
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   role: string;
-  email_id: string;
-  address_line_1: string;
-  address_line_2?: string;
+  emailId: string;
+  addressLine1: string;
+  addressLine2?: string;
   city: string;
   state: string;
-  zip_code: string;
-  phone_number: string;
-  hire_date: string;
-  is_active?: boolean;
+  zipCode: string;
+  phoneNumber: string;
+  hireDate: string;
+  isActive?: boolean;
   comment?: string;
 }
 
@@ -48,53 +89,80 @@ export const employeeService = {
   async getAll(): Promise<Employee[]> {
     if (shouldUseMockData()) {
       console.log('Using mock data for employees list');
-      return mockEmployeeService.getAll();
+      const mockData = await mockEmployeeService.getAll();
+      return mockData.map(transformToEmployee);
     }
-    const response = await axios.get(`${getApiUrl()}/employees`);
-    return response.data;
+    const response = await api.get('/employees');
+    return response.data.map(transformToEmployee);
   },
 
   async getProfile(): Promise<Employee> {
     if (shouldUseMockData()) {
       console.log('Using mock data for employee profile');
-      return mockEmployeeService.getProfile();
+      const mockData = await mockEmployeeService.getProfile();
+      return transformToEmployee(mockData);
     }
-    const response = await axios.get(`${getApiUrl()}/employees/profile`);
-    return response.data;
+    const response = await api.get('/employees/profile');
+    return transformToEmployee(response.data);
   },
 
-  async getById(id: number): Promise<Employee> {
+  async getById(id: string): Promise<Employee> {
     if (shouldUseMockData()) {
       console.log('Using mock data for employee by ID');
-      return mockEmployeeService.getById(id);
+      const mockData = await mockEmployeeService.getById(id);
+      return transformToEmployee(mockData);
     }
-    const response = await axios.get(`${getApiUrl()}/employees/${id}`);
-    return response.data;
+    const response = await api.get(`/employees/${id}`);
+    return transformToEmployee(response.data);
+  },
+
+  async getByEmail(email: string): Promise<Employee> {
+    console.log('getByEmail called with:', email, 'shouldUseMockData:', shouldUseMockData());
+    
+    if (shouldUseMockData()) {
+      console.log('Using mock data for employee by email');
+      const allEmployees = await mockEmployeeService.getAll();
+      const employee = allEmployees.find(emp => emp.email_id === email);
+      if (!employee) {
+        throw new Error(`Employee not found with email: ${email}`);
+      }
+      return transformToEmployee(employee);
+    }
+    
+    console.log('Making API call to fetch employee by email');
+    const response = await api.get(`/employees/email/${email}`);
+    return transformToEmployee(response.data);
   },
 
   async create(employee: CreateEmployeeDto): Promise<Employee> {
     if (shouldUseMockData()) {
       console.log('Using mock data for employee creation');
-      return mockEmployeeService.create(employee);
+      const apiFormat = transformToApiFormat(employee);
+      const mockData = await mockEmployeeService.create(apiFormat);
+      return transformToEmployee(mockData);
     }
-    const response = await axios.post(`${getApiUrl()}/employees`, employee);
-    return response.data;
+    const apiFormat = transformToApiFormat(employee);
+    const response = await api.post('/employees', apiFormat);
+    return transformToEmployee(response.data);
   },
 
-  async update(id: number, employee: Partial<CreateEmployeeDto>): Promise<Employee> {
+  async update(id: string, employee: Partial<CreateEmployeeDto>): Promise<Employee> {
     if (shouldUseMockData()) {
       console.log('Using mock data for employee update');
-      return mockEmployeeService.update(id, employee);
+      const apiFormat = transformToApiFormat(employee);
+      const mockData = await mockEmployeeService.update(id, apiFormat);
+      return transformToEmployee(mockData);
     }
-    const response = await axios.patch(`${getApiUrl()}/employees/${id}`, employee);
-    return response.data;
+    const apiFormat = transformToApiFormat(employee);
+    const response = await api.patch(`/employees/${id}`, apiFormat);
+    return transformToEmployee(response.data);
   },
 
-  async delete(id: number): Promise<void> {
+  async delete(id: string): Promise<void> {
     if (shouldUseMockData()) {
       console.log('Using mock data for employee deletion');
       return mockEmployeeService.delete(id);
     }
-    await axios.delete(`${getApiUrl()}/employees/${id}`);
+    await api.delete(`/employees/${id}`);
   },
 };

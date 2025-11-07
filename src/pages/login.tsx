@@ -52,30 +52,58 @@ export default function LoginPage() {
   const [mounted, setMounted] = useState(false);
   const { login, loginWithMsal, user } = useAuth();
   const router = useRouter();
+  const hasRedirected = React.useRef(false);
+
+  console.log('[LoginPage] Component state:', { 
+    mounted, 
+    hasUser: !!user, 
+    returnUrl: router.query.returnUrl,
+    fullQuery: router.query,
+    pathname: router.pathname,
+    asPath: router.asPath,
+    isReady: router.isReady,
+    hasRedirected: hasRedirected.current
+  });
 
   // Ensure component is mounted to prevent hydration mismatch
   React.useEffect(() => {
     setMounted(true);
   }, []);
 
-  // If already logged in, redirect to home
+  // If already logged in, redirect to returnUrl or home
   React.useEffect(() => {
-    if (mounted && user) {
-      router.push('/');
+    // Wait for router to be ready to ensure query params are available
+    if (!mounted || !user || !router.isReady || hasRedirected.current) {
+      return;
     }
-  }, [user, router, mounted]);
+    
+    const returnUrl = router.query.returnUrl as string | undefined;
+    const destination = returnUrl || '/';
+    
+    console.log('[LoginPage] User already logged in, redirecting to:', {
+      destination,
+      returnUrl,
+      queryParams: router.query,
+      isReady: router.isReady
+    });
+    
+    hasRedirected.current = true;
+    router.push(destination);
+  }, [user, mounted, router]);
 
   const handleDummyLogin = async (dummyUser: typeof dummyUsers[0]) => {
-    console.log('Dummy login clicked for user:', dummyUser);
+    console.log('[LoginPage] Dummy login clicked for user:', dummyUser);
+    console.log('[LoginPage] ReturnUrl at login:', router.query.returnUrl);
     setLoading(true);
     setError('');
     
     try {
       await login(dummyUser);
-      console.log('Login successful, redirecting to home...');
-      router.push('/');
+      const destination = (router.query.returnUrl as string) || '/';
+      console.log('[LoginPage] Login successful, redirecting to:', destination);
+      router.push(destination);
     } catch (err) {
-      console.error('Login error:', err);
+      console.error('[LoginPage] Login error:', err);
       setError('Login failed. Please try again.');
     } finally {
       setLoading(false);
@@ -95,7 +123,9 @@ export default function LoginPage() {
     if (dummyUser) {
       try {
         await login(dummyUser);
-        router.push('/');
+        const destination = (router.query.returnUrl as string) || '/';
+        console.log('[LoginPage] Form login successful, redirecting to:', destination);
+        router.push(destination);
       } catch (err) {
         setError('Login failed. Please try again.');
       }
@@ -112,7 +142,9 @@ export default function LoginPage() {
     
     try {
       await loginWithMsal();
-      router.push('/');
+      const destination = (router.query.returnUrl as string) || '/';
+      console.log('[LoginPage] Azure login successful, redirecting to:', destination);
+      router.push(destination);
     } catch (err) {
       setError('Azure AD login failed. Please try again.');
     } finally {
@@ -303,11 +335,4 @@ export default function LoginPage() {
       </Box>
     </Container>
   );
-}
-
-// Force server-side rendering to prevent static generation issues
-export async function getServerSideProps() {
-  return {
-    props: {},
-  };
 }

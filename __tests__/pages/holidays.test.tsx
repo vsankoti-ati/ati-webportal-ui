@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react'
-import { mockUsers } from '../utils/test-utils'
+import { screen } from '@testing-library/react'
+import { render, mockUsers } from '../utils/test-utils'
 import HolidaysPage from '../../src/pages/holidays'
 
 const mockUseAuth = jest.fn()

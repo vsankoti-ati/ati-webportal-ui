@@ -20,7 +20,7 @@ export default function EditEmployeePage() {
 
   const loadEmployee = async () => {
     try {
-      const data = await employeeService.getById(Number(id));
+      const data = await employeeService.getById(String(id));
       setEmployee(data);
     } catch (error) {
       console.error('Error loading employee:', error);

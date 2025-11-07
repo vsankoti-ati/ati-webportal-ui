@@ -16,6 +16,7 @@ import {
   Chip,
   Divider,
   Alert,
+  CircularProgress,
 } from '@mui/material';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { 
@@ -29,7 +30,6 @@ import { fetchActiveProjects } from '@/services/projectService';
 import { format } from 'date-fns';
 import TimeEntryForm from '@/components/timesheets/TimeEntryForm';
 import { useConfirm } from '@/hooks/useConfirm';
-import { ProtectedRoute } from '@/components/ProtectedRoute';
 import Layout from '@/components/Layout';
 
 export default function TimesheetDetails() {
@@ -87,33 +87,30 @@ export default function TimesheetDetails() {
   };
 
   const totalHours = timeEntries?.reduce(
-    (sum, entry) => sum + entry.hours_worked,
+    (sum, entry) => sum + entry.hoursWorked,
     0
   ) || 0;
 
   if (isLoadingTimesheet) {
     return (
-      <ProtectedRoute>
-        <Layout>
-          <div>Loading...</div>
-        </Layout>
-      </ProtectedRoute>
+      <Layout>
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
+          <CircularProgress />
+        </Box>
+      </Layout>
     );
   }
 
   if (!timesheet) {
     return (
-      <ProtectedRoute>
-        <Layout>
-          <div>Timesheet not found</div>
-        </Layout>
-      </ProtectedRoute>
+      <Layout>
+        <div>Timesheet not found</div>
+      </Layout>
     );
   }
 
   return (
-    <ProtectedRoute>
-      <Layout>
+    <Layout>
         <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
             <Typography variant="h4" component="h1">
@@ -177,8 +174,8 @@ export default function TimesheetDetails() {
                   Period
                 </Typography>
                 <Typography>
-                  {format(new Date(timesheet.start_date), 'MMM d, yyyy')} -{' '}
-                  {format(new Date(timesheet.end_date), 'MMM d, yyyy')}
+                  {format(new Date(timesheet.startDate), 'MMM d, yyyy')} -{' '}
+                  {format(new Date(timesheet.endDate), 'MMM d, yyyy')}
                 </Typography>
               </Box>
               <Box>
@@ -202,23 +199,23 @@ export default function TimesheetDetails() {
                 </Typography>
                 <Typography>{totalHours}</Typography>
               </Box>
-              {timesheet.submission_date && (
+              {timesheet.submissionDate && (
                 <Box>
                   <Typography color="text.secondary" gutterBottom>
                     Submitted
                   </Typography>
                   <Typography>
-                    {format(new Date(timesheet.submission_date), 'MMM d, yyyy')}
+                    {format(new Date(timesheet.submissionDate), 'MMM d, yyyy')}
                   </Typography>
                 </Box>
               )}
-              {timesheet.approval_date && (
+              {timesheet.approvalDate && (
                 <Box>
                   <Typography color="text.secondary" gutterBottom>
                     {timesheet.status === 'approved' ? 'Approved' : 'Rejected'} On
                   </Typography>
                   <Typography>
-                    {format(new Date(timesheet.approval_date), 'MMM d, yyyy')}
+                    {format(new Date(timesheet.approvalDate), 'MMM d, yyyy')}
                   </Typography>
                 </Box>
               )}
@@ -262,12 +259,12 @@ export default function TimesheetDetails() {
                 {timeEntries?.map((entry) => (
                   <TableRow key={entry.id}>
                     <TableCell>
-                      {format(new Date(entry.entry_date), 'MMM d, yyyy')}
+                      {format(new Date(entry.entryDate), 'MMM d, yyyy')}
                     </TableCell>
                     <TableCell>{entry.project?.name}</TableCell>
-                    <TableCell>{entry.hours_worked}</TableCell>
+                    <TableCell>{entry.hoursWorked}</TableCell>
                     <TableCell>
-                      {entry.start_time} - {entry.end_time}
+                      {entry.startTime} - {entry.endTime}
                     </TableCell>
                     <TableCell>{entry.notes || '-'}</TableCell>
                     {timesheet.status === 'draft' && (
@@ -312,13 +309,5 @@ export default function TimesheetDetails() {
       </Grid>
         </Container>
       </Layout>
-    </ProtectedRoute>
   );
-}
-
-// Force server-side rendering to prevent static generation issues
-export async function getServerSideProps() {
-  return {
-    props: {},
-  };
 }

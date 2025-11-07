@@ -147,24 +147,24 @@ export default function TimesheetApprovals() {
           </TableHead>
           <TableBody>
             {timesheets?.map((timesheet) => {
-              const totalHours = timesheet.time_entries?.reduce(
-                (sum, entry) => sum + entry.hours_worked,
+              const totalHours = timesheet.timeEntries?.reduce(
+                (sum, entry) => sum + entry.hoursWorked,
                 0
               ) || 0;
 
               return (
                 <TableRow key={timesheet.id}>
                   <TableCell>
-                    {timesheet.employee?.first_name} {timesheet.employee?.last_name}
+                    {timesheet.employee?.firstName} {timesheet.employee?.lastName}
                   </TableCell>
                   <TableCell>
-                    {format(new Date(timesheet.start_date), 'MMM d, yyyy')} -{' '}
-                    {format(new Date(timesheet.end_date), 'MMM d, yyyy')}
+                    {format(new Date(timesheet.startDate), 'MMM d, yyyy')} -{' '}
+                    {format(new Date(timesheet.endDate), 'MMM d, yyyy')}
                   </TableCell>
                   <TableCell>{totalHours}</TableCell>
                   <TableCell>
-                    {timesheet.submission_date
-                      ? format(new Date(timesheet.submission_date), 'MMM d, yyyy')
+                    {timesheet.submissionDate
+                      ? format(new Date(timesheet.submissionDate), 'MMM d, yyyy')
                       : '-'}
                   </TableCell>
                   <TableCell>
@@ -202,11 +202,4 @@ export default function TimesheetApprovals() {
         </Layout>
       </ProtectedRoute>
   );
-}
-
-// Force server-side rendering to prevent static generation issues
-export async function getServerSideProps() {
-  return {
-    props: {},
-  };
 }

@@ -35,7 +35,7 @@ const useMockData = process.env.NEXT_PUBLIC_SKIP_MSAL === 'true' ||
                     process.env.NODE_ENV === 'development' && !process.env.NEXT_PUBLIC_API_URL;
 
 interface LeaveApplicationsProps {
-  employeeId: number;
+  employeeId: string;
   isAdmin?: boolean;
 }
 

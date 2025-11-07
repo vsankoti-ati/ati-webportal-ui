@@ -13,7 +13,7 @@ const useMockData = process.env.NEXT_PUBLIC_SKIP_MSAL === 'true' ||
 
 export default function LeavePage() {
   const { user, isAuthenticated } = useAuth();
-  const [employeeId, setEmployeeId] = useState<number | null>(null);
+  const [employeeId, setEmployeeId] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -21,7 +21,7 @@ export default function LeavePage() {
     if (isAuthenticated && user) {
       if (useMockData) {
         // Use mock data for development
-        setEmployeeId(101); // Mock employee ID
+        setEmployeeId('101'); // Mock employee ID
         setIsAdmin(user.roles.includes('Admin') || user.roles.includes('HR'));
         setLoading(false);
       } else {
@@ -39,7 +39,7 @@ export default function LeavePage() {
     } catch (error) {
       console.error('Error loading employee details:', error);
       // Fallback to mock ID if API fails
-      setEmployeeId(101);
+      setEmployeeId('101');
     } finally {
       setLoading(false);
     }

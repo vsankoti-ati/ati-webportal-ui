@@ -227,6 +227,44 @@ export const mockJobOpenings = [
 
 // Mock data for employees
 export const mockEmployees = [
+  // Login users - matching the dummy users in login page
+  {
+    id: 1,
+    first_name: 'Admin',
+    last_name: 'User',
+    role: 'System Administrator',
+    email_id: 'admin@atiwebportal.com',
+    address_line_1: '100 Admin Street',
+    address_line_2: 'Suite 1',
+    city: 'San Francisco',
+    state: 'CA',
+    zip_code: '94105',
+    phone_number: '(555) 000-0001',
+    hire_date: '2020-01-01',
+    is_active: true,
+    comment: 'System administrator with full access',
+    created_at: '2020-01-01T08:00:00Z',
+    updated_at: '2025-10-15T10:30:00Z'
+  },
+  {
+    id: 2,
+    first_name: 'John',
+    last_name: 'Employee',
+    role: 'Software Developer',
+    email_id: 'employee@atiwebportal.com',
+    address_line_1: '200 Employee Avenue',
+    address_line_2: 'Apt 2B',
+    city: 'San Francisco',
+    state: 'CA',
+    zip_code: '94105',
+    phone_number: '(555) 000-0002',
+    hire_date: '2022-06-15',
+    is_active: true,
+    comment: 'Regular employee with standard access',
+    created_at: '2022-06-15T08:00:00Z',
+    updated_at: '2025-10-15T10:30:00Z'
+  },
+  // Additional employees
   {
     id: 101,
     first_name: 'John',
@@ -445,10 +483,10 @@ export const mockEmployeeService = {
     return mockEmployees[0];
   },
 
-  async getById(id: number) {
+  async getById(id: string) {
     await this.delay();
     console.log(`Mock API: Fetching employee ${id}`);
-    const employee = mockEmployees.find(emp => emp.id === id);
+    const employee = mockEmployees.find(emp => emp.id.toString() === id.toString());
     if (!employee) throw new Error('Employee not found');
     return employee;
   },
@@ -469,11 +507,11 @@ export const mockEmployeeService = {
     return newEmployee;
   },
 
-  async update(id: number, employee: any) {
+  async update(id: string, employee: any) {
     await this.delay();
     console.log(`Mock API: Updating employee ${id}`, employee);
     
-    const empIndex = mockEmployees.findIndex(emp => emp.id === id);
+    const empIndex = mockEmployees.findIndex(emp => emp.id.toString() === id.toString());
     if (empIndex === -1) throw new Error('Employee not found');
     
     mockEmployees[empIndex] = {
@@ -485,11 +523,11 @@ export const mockEmployeeService = {
     return mockEmployees[empIndex];
   },
 
-  async delete(id: number) {
+  async delete(id: string) {
     await this.delay();
     console.log(`Mock API: Deleting employee ${id}`);
     
-    const empIndex = mockEmployees.findIndex(emp => emp.id === id);
+    const empIndex = mockEmployees.findIndex(emp => emp.id.toString() === id.toString());
     if (empIndex === -1) throw new Error('Employee not found');
     
     mockEmployees.splice(empIndex, 1);

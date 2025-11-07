@@ -42,15 +42,15 @@ export default function TimeEntryForm({ timesheetId, timesheet, projects, onSucc
 
   const onSubmit = (data: CreateTimeEntryDto) => {
     const validation = validateTimeEntry(
-      new Date(data.entry_date),
-      data.start_time,
-      data.end_time,
-      new Date(timesheet.start_date),
-      new Date(timesheet.end_date)
+      new Date(data.entryDate),
+      data.startTime,
+      data.endTime,
+      new Date(timesheet.startDate),
+      new Date(timesheet.endDate)
     );
 
     if (!validation.isValid) {
-      setError('entry_date', { message: validation.error });
+      setError('entryDate', { message: validation.error });
       return;
     }
 
@@ -68,12 +68,12 @@ export default function TimeEntryForm({ timesheetId, timesheet, projects, onSucc
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
           <TextField
-            {...register('project_id', { required: 'Project is required' })}
+            {...register('projectId', { required: 'Project is required' })}
             select
             label="Project"
             fullWidth
-            error={!!errors.project_id}
-            helperText={errors.project_id?.message}
+            error={!!errors.projectId}
+            helperText={errors.projectId?.message}
           >
             {projects.map((project) => (
               <MenuItem key={project.id} value={project.id}>
@@ -85,43 +85,43 @@ export default function TimeEntryForm({ timesheetId, timesheet, projects, onSucc
 
         <Grid item xs={12} md={6}>
           <TextField
-            {...register('entry_date', { required: 'Date is required' })}
+            {...register('entryDate', { required: 'Date is required' })}
             label="Date"
             type="date"
             fullWidth
             InputLabelProps={{ shrink: true }}
-            error={!!errors.entry_date}
-            helperText={errors.entry_date?.message}
+            error={!!errors.entryDate}
+            helperText={errors.entryDate?.message}
           />
         </Grid>
 
         <Grid item xs={12} md={6}>
           <TextField
-            {...register('start_time', { required: 'Start time is required' })}
+            {...register('startTime', { required: 'Start time is required' })}
             label="Start Time"
             type="time"
             fullWidth
             InputLabelProps={{ shrink: true }}
-            error={!!errors.start_time}
-            helperText={errors.start_time?.message}
+            error={!!errors.startTime}
+            helperText={errors.startTime?.message}
           />
         </Grid>
 
         <Grid item xs={12} md={6}>
           <TextField
-            {...register('end_time', { required: 'End time is required' })}
+            {...register('endTime', { required: 'End time is required' })}
             label="End Time"
             type="time"
             fullWidth
             InputLabelProps={{ shrink: true }}
-            error={!!errors.end_time}
-            helperText={errors.end_time?.message}
+            error={!!errors.endTime}
+            helperText={errors.endTime?.message}
           />
         </Grid>
 
         <Grid item xs={12} md={6}>
           <TextField
-            {...register('hours_worked', {
+            {...register('hoursWorked', {
               required: 'Hours worked is required',
               min: { value: 0, message: 'Hours must be positive' },
               max: { value: 24, message: 'Hours cannot exceed 24' },
@@ -130,8 +130,8 @@ export default function TimeEntryForm({ timesheetId, timesheet, projects, onSucc
             type="number"
             fullWidth
             inputProps={{ step: 0.5, min: 0, max: 24 }}
-            error={!!errors.hours_worked}
-            helperText={errors.hours_worked?.message}
+            error={!!errors.hoursWorked}
+            helperText={errors.hoursWorked?.message}
           />
         </Grid>
 
