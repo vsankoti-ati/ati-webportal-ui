@@ -31,7 +31,7 @@ const dummyUsers = [
     email: 'admin@atiwebportal.com',
     password: 'admin123',
     name: 'Admin User',
-    roles: ['Admin'],
+    roles: ['ati_portal_admin'],
     department: 'IT Administration'
   },
   {
@@ -39,7 +39,7 @@ const dummyUsers = [
     email: 'employee@atiwebportal.com',
     password: 'emp123',
     name: 'John Employee',
-    roles: ['Employee'],
+    roles: ['ati_portal_user'],
     department: 'Software Development'
   }
 ];
@@ -291,7 +291,7 @@ export default function LoginPage() {
                       onClick={() => handleDummyLogin(user)}
                     >
                       <ListItemAvatar>
-                        <Avatar sx={{ bgcolor: user.roles.includes('Admin') ? 'error.main' : 'primary.main' }}>
+                        <Avatar sx={{ bgcolor: user.roles.includes('ati_portal_admin') ? 'error.main' : 'primary.main' }}>
                           <PersonIcon />
                         </Avatar>
                       </ListItemAvatar>
@@ -304,7 +304,7 @@ export default function LoginPage() {
                             <Chip
                               size="small"
                               label={user.roles[0]}
-                              color={user.roles.includes('Admin') ? 'error' : 'primary'}
+                              color={user.roles.includes('ati_portal_admin') ? 'error' : 'primary'}
                             />
                           </Box>
                         }

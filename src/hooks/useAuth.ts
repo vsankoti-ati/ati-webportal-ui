@@ -86,7 +86,7 @@ const mockUser: User = {
   id: 'dev-user-123',
   email: 'developer@company.com',
   name: 'Development User',
-  roles: ['Admin', 'HR', 'User'], // Full permissions for testing
+  roles: ['ati_portal_admin'], // Full permissions for testing
   employeeData: getStoredEmployeeData(), // Try to get stored employee data
 };
 
@@ -575,6 +575,7 @@ function usePKCEAuth(): AuthState {
         console.log('[usePKCEAuth] Fetching employee data for:', userData.email);
         const employeeData = await fetchEmployeeDataByEmail(userData.email);
         userData.employeeData = employeeData;
+        userData.roles = employeeData ? employeeData.role ? [employeeData.role] : ['ati_portal_user'] : ['ati_portal_user'];
       }
       
       setUser(userData);

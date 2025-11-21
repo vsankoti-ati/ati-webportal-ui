@@ -33,14 +33,7 @@ export default function NewTimesheet() {
     setValue,
   } = useForm<CreateTimesheetDto>();
 
-  // Now you can access user details:
-  // user.id - User ID
-  // user.name - User's name
-  // user.email - User's email
-  // user.roles - Array of user roles
-  // user.department - User's department (optional)
-  // employeeData - Complete employee information from the API
-  
+ 
   console.log('Logged in user:', user);
   console.log('Employee data:', employeeData);
 
@@ -61,7 +54,7 @@ export default function NewTimesheet() {
   const onSubmit = (data: CreateTimesheetDto) => {
     // Get employee ID from employee data and assign to data.employeeId
     if (employeeData?.id) {
-      data.employeeId = employeeData.id;
+      data.employeeId = employeeData.id.toLowerCase();
       console.log('Assigning employee ID to timesheet:', employeeData.id);
     } else {
       console.warn('Employee data not available, cannot assign employee ID');

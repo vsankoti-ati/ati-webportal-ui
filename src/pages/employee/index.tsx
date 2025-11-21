@@ -5,7 +5,7 @@ import { ProtectedRoute } from '../../components/ProtectedRoute';
 
 export default function EmployeePage() {
   return (
-    <ProtectedRoute roles={['Admin', 'HR']}>
+    <ProtectedRoute roles={['ati_portal_admin']}>
       <Layout>
         <Container maxWidth="lg">
           <Box sx={{ mt: 4 }}>

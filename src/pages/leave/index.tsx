@@ -22,19 +22,19 @@ export default function LeavePage() {
       if (useMockData) {
         // Use mock data for development
         setEmployeeId('101'); // Mock employee ID
-        setIsAdmin(user.roles.includes('Admin') || user.roles.includes('HR'));
+        setIsAdmin(user.roles.includes('ati_portal_admin'));
         setLoading(false);
       } else {
         // Use real API for production
         loadEmployeeDetails(user.email);
-        setIsAdmin(user.roles.includes('Admin') || user.roles.includes('HR'));
+        setIsAdmin(user.roles.includes('ati_portal_admin'));
       }
     }
   }, [user, isAuthenticated]);
 
   const loadEmployeeDetails = async (email: string) => {
     try {
-      const employee = await employeeService.getProfile();
+      const employee = await employeeService.getByEmail(email);
       setEmployeeId(employee.id);
     } catch (error) {
       console.error('Error loading employee details:', error);
@@ -58,7 +58,7 @@ export default function LeavePage() {
   }
 
   return (
-    <ProtectedRoute roles={['Admin', 'HR']}>
+    <ProtectedRoute roles={['ati_portal_admin']}>
       <Layout>
         <Container maxWidth="lg">
           <Box sx={{ mt: 4 }}>

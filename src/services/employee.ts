@@ -26,6 +26,11 @@ const transformToEmployee = (apiEmployee: any): Employee => {
     comment: apiEmployee.comment,
     createdAt: apiEmployee.createdAt || apiEmployee.created_at,
     updatedAt: apiEmployee.updatedAt || apiEmployee.updated_at,
+    roles: apiEmployee.roles ? apiEmployee.roles.map((role: any) => ({
+      id: role.id,
+      name: role.name,
+      description: role.description,
+    })) : [],
   };
 };
 
@@ -67,6 +72,13 @@ export interface Employee {
   comment?: string;
   createdAt: string;
   updatedAt: string;
+  roles?: RoleDto[];
+}
+
+export interface RoleDto {
+  id: number;
+  name?: string;
+  description?: string;
 }
 
 export interface CreateEmployeeDto {

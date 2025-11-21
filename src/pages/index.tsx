@@ -28,6 +28,7 @@ import {
   CheckCircle as ApprovedIcon,
   Pending as PendingIcon,
   Cancel as RejectedIcon,
+  AccessTime as TimesheetIcon,
 } from '@mui/icons-material';
 import { useRouter } from 'next/router';
 import { ProtectedRoute } from '../components/ProtectedRoute';
@@ -189,6 +190,10 @@ export default function Home() {
     router.push('/leave');
   };
 
+  const handleCreateWeeklyTimesheet = () => {
+    router.push('/timesheets/weekly');
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'APPROVED':
@@ -308,6 +313,89 @@ export default function Home() {
                     Click "View & Edit Profile" to update your personal details, contact information, and emergency contacts.
                   </Typography>
                 </Paper>
+              </CardContent>
+            </Card>
+
+            {/* Quick Actions Section */}
+            <Card sx={{ mb: 4 }}>
+              <CardContent>
+                <Typography variant="h5" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  Quick Actions
+                </Typography>
+                <Grid container spacing={2} sx={{ mt: 1 }}>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Paper 
+                      sx={{ 
+                        p: 3, 
+                        textAlign: 'center', 
+                        cursor: 'pointer',
+                        transition: 'all 0.3s',
+                        '&:hover': {
+                          bgcolor: 'primary.50',
+                          transform: 'translateY(-4px)',
+                          boxShadow: 3,
+                        }
+                      }}
+                      onClick={handleCreateWeeklyTimesheet}
+                    >
+                      <TimesheetIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
+                      <Typography variant="h6" gutterBottom>
+                        Weekly Timesheet
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Enter time entries for the entire week at once
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Paper 
+                      sx={{ 
+                        p: 3, 
+                        textAlign: 'center', 
+                        cursor: 'pointer',
+                        transition: 'all 0.3s',
+                        '&:hover': {
+                          bgcolor: 'success.50',
+                          transform: 'translateY(-4px)',
+                          boxShadow: 3,
+                        }
+                      }}
+                      onClick={handleViewAllLeaves}
+                    >
+                      <LeaveIcon sx={{ fontSize: 48, color: 'success.main', mb: 1 }} />
+                      <Typography variant="h6" gutterBottom>
+                        Apply for Leave
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Submit new leave application or view history
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <Paper 
+                      sx={{ 
+                        p: 3, 
+                        textAlign: 'center', 
+                        cursor: 'pointer',
+                        transition: 'all 0.3s',
+                        '&:hover': {
+                          bgcolor: 'info.50',
+                          transform: 'translateY(-4px)',
+                          boxShadow: 3,
+                        }
+                      }}
+                      onClick={handleViewProfile}
+                    >
+                      <EditIcon sx={{ fontSize: 48, color: 'info.main', mb: 1 }} />
+                      <Typography variant="h6" gutterBottom>
+                        Update Profile
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Keep your personal information current
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                </Grid>
               </CardContent>
             </Card>
 

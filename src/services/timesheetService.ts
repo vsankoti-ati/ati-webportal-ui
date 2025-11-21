@@ -269,7 +269,7 @@ export const createTimeEntry = async (timesheetId: number, data: CreateTimeEntry
       entryDate: data.entryDate,
       startTime: data.startTime,
       endTime: data.endTime,
-      hoursWorked: data.hoursWorked,
+      hoursWorked: Number(data.hoursWorked),
       notes: data.notes,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()

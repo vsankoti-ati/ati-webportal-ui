@@ -30,6 +30,7 @@ import Layout from '@/components/Layout';
 
 // Add this query function to timesheetService.ts
 import { fetchPendingApprovals } from '@/services/timesheetService';
+import { useEmployeeData } from '@/hooks/useEmployee';
 
 const getStatusColor = (status: Timesheet['status']) => {
   switch (status) {
@@ -49,9 +50,10 @@ const getStatusColor = (status: Timesheet['status']) => {
 export default function TimesheetApprovals() {
   const router = useRouter();
   const { user } = useAuth();
+  const { employeeData } = useEmployeeData();
   
   // Check if user has admin or HR privileges
-  const hasApprovalRights = user?.roles.some(role => ['Admin', 'HR'].includes(role));
+  const hasApprovalRights = employeeData?.roles?.some(role => ['ati_portal_admin'].includes(role.name || ''));
   
   const { data: timesheets, isLoading } = useQuery(
     'pending-approvals',
@@ -101,7 +103,7 @@ export default function TimesheetApprovals() {
 
   if (isLoading) {
     return (
-      <ProtectedRoute roles={['Admin', 'HR']}>
+      <ProtectedRoute roles={['ati_portal_admin']}>
         <Layout>
           <Container maxWidth="lg">
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -114,7 +116,7 @@ export default function TimesheetApprovals() {
   }
 
   return (
-    <ProtectedRoute roles={['Admin', 'HR']}>
+    <ProtectedRoute roles={['ati_portal_admin']}>
       <Layout>
         <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>

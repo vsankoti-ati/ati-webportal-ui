@@ -38,6 +38,7 @@ import {
 import { styled } from '@mui/material/styles';
 import { useRouter } from 'next/router';
 import { useAuth } from '@/hooks/useAuth';
+import { useEmployeeData } from '@/hooks/useEmployee';
 
 const drawerWidth = 240;
 
@@ -64,8 +65,8 @@ interface LayoutProps {
 
 // Menu items configuration with role-based access
 const getMenuItems = (userRoles: string[] = []) => {
-  const isAdmin = userRoles.includes('Admin');
-  const isHR = userRoles.includes('HR');
+  const isAdmin = userRoles.includes('ati_portal_admin');
+  const isHR = userRoles.includes('ati_portal_hr');
   
   const baseItems = [
     { text: 'Home', icon: <Home />, path: '/' },
@@ -95,6 +96,9 @@ export default function Layout({ children }: LayoutProps) {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const router = useRouter();
   const { user, isAuthenticated, logout } = useAuth();
+  const { employeeData } = useEmployeeData();
+  const userRoles = employeeData?.roles?.map(role => role.name || '') || [];
+  console.log('Layout render - user roles:', userRoles);
 
   React.useEffect(() => {
     setMounted(true);
@@ -176,7 +180,7 @@ export default function Layout({ children }: LayoutProps) {
                   {user?.email}
                 </Typography>
                 <Typography variant="caption" color="primary" sx={{ display: 'block' }}>
-                  {user?.roles?.join(', ')}
+                  {userRoles.join(', ')}
                 </Typography>
               </Box>
             </MenuItem>
@@ -208,7 +212,7 @@ export default function Layout({ children }: LayoutProps) {
       >
         <Toolbar />
         <List>
-          {getMenuItems(user?.roles || []).map((item) => (
+          {getMenuItems(userRoles || []).map((item) => (
             <ListItem
               button
               key={item.text}
@@ -238,7 +242,7 @@ export default function Layout({ children }: LayoutProps) {
       >
         <Toolbar />
         <List>
-          {getMenuItems(user?.roles || []).map((item) => (
+          {getMenuItems(userRoles|| []).map((item) => (
             <ListItem
               button
               key={item.text}

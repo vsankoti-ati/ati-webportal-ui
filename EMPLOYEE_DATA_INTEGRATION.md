@@ -147,10 +147,10 @@ function ComprehensiveProfile() {
 import { useUserRoles } from '@/hooks/useEmployee';
 
 function AdminPanel() {
-  const { hasRole, userRoles } = useUserRoles(['Admin', 'HR']);
+  const { hasRole, userRoles } = useUserRoles(['ati_portal_admin']);
 
   if (!hasRole) {
-    return <div>Access denied. Required roles: Admin or HR</div>;
+    return <div>Access denied. Required roles: Admin</div>;
   }
 
   return (

@@ -103,7 +103,7 @@ export default function TimesheetReview() {
     0
   ) || 0;
 
-  if (!user?.roles.includes('Admin')) {
+  if (!user?.roles.includes('ati_portal_admin')) {
     return (
       <ProtectedRoute>
         <Layout>

@@ -53,7 +53,7 @@ export default function TimeEntryForm({ timesheetId, timesheet, projects, onSucc
       setError('entryDate', { message: validation.error });
       return;
     }
-
+    data.hoursWorked = Number(data.hoursWorked);
     createMutation.mutate(data);
   };
 
@@ -61,7 +61,7 @@ export default function TimeEntryForm({ timesheetId, timesheet, projects, onSucc
     <form onSubmit={handleSubmit(onSubmit)}>
       {createMutation.isError && (
         <Alert severity="error" sx={{ mb: 2 }}>
-          Failed to create time entry. Please try again.
+          Failed to create time entry. Please try again. {JSON.stringify(createMutation.error)}
         </Alert>
       )}
 
@@ -89,7 +89,7 @@ export default function TimeEntryForm({ timesheetId, timesheet, projects, onSucc
             label="Date"
             type="date"
             fullWidth
-            InputLabelProps={{ shrink: true }}
+            InputLabelProps={{ shrink: true }}          
             error={!!errors.entryDate}
             helperText={errors.entryDate?.message}
           />
@@ -101,6 +101,7 @@ export default function TimeEntryForm({ timesheetId, timesheet, projects, onSucc
             label="Start Time"
             type="time"
             fullWidth
+            defaultValue="09:00"
             InputLabelProps={{ shrink: true }}
             error={!!errors.startTime}
             helperText={errors.startTime?.message}
@@ -113,6 +114,7 @@ export default function TimeEntryForm({ timesheetId, timesheet, projects, onSucc
             label="End Time"
             type="time"
             fullWidth
+            defaultValue="17:00"
             InputLabelProps={{ shrink: true }}
             error={!!errors.endTime}
             helperText={errors.endTime?.message}

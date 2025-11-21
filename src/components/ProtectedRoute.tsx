@@ -2,6 +2,7 @@ import { ReactNode, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import { CircularProgress, Box, Typography } from '@mui/material';
 import { useAuth } from '@/hooks/useAuth';
+import { useEmployeeData } from '@/hooks/useEmployee';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -9,22 +10,13 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, roles }: ProtectedRouteProps) {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading, getEmployeeData } = useAuth();
   const router = useRouter();
   const hasAttemptedRedirect = useRef(false);
   const isCheckingAuth = useRef(false);
-  const currentPath = useRef(router.asPath);
-  
-  console.log('[ProtectedRoute] Render:', {
-    isAuthenticated,
-    isLoading,
-    hasUser: !!user,
-    userName: user?.name,
-    path: router.asPath,
-    pathname: router.pathname,
-    isReady: router.isReady
-  });
-  
+  const currentPath = useRef(router.asPath);  
+  const { employeeData, isLoading: isLoadingEmployee, error: employeeError } = useEmployeeData(); // Get employee data
+
   // Reset redirect flag when path changes
   useEffect(() => {
     if (currentPath.current !== router.asPath) {
@@ -48,16 +40,7 @@ export function ProtectedRoute({ children, roles }: ProtectedRouteProps) {
     if (!isLoading && !isAuthenticated && !hasAttemptedRedirect.current) {
       isCheckingAuth.current = true;
       hasAttemptedRedirect.current = true;
-      
-      console.log('[ProtectedRoute] User not authenticated, redirecting to login...', {
-        isLoading,
-        isAuthenticated,
-        user,
-        currentPath: router.pathname,
-        asPath: router.asPath,
-        isReady: router.isReady
-      });
-      
+
       // Store the intended destination for redirect after login
       const returnUrl = router.asPath;
       router.push({
@@ -117,7 +100,8 @@ export function ProtectedRoute({ children, roles }: ProtectedRouteProps) {
 
   // Check roles if specified
   if (roles && roles.length > 0 && user) {
-    const hasRequiredRole = roles.some(role => user.roles.includes(role));
+    const userRoles = employeeData?.roles?.map(role => role.name || '') || [];
+    const hasRequiredRole = roles.some(role => userRoles.includes(role));
     if (!hasRequiredRole) {
       console.log('[ProtectedRoute] User lacks required role', {
         userRoles: user.roles,

@@ -259,10 +259,10 @@ export default function TimesheetDetails() {
                 {timeEntries?.map((entry) => (
                   <TableRow key={entry.id}>
                     <TableCell>
-                      {format(new Date(entry.entryDate), 'MMM d, yyyy')}
+                      {entry.entryDate}
                     </TableCell>
                     <TableCell>{entry.project?.name}</TableCell>
-                    <TableCell>{entry.hoursWorked}</TableCell>
+                    <TableCell>{entry.hoursWorked || 8}</TableCell>
                     <TableCell>
                       {entry.startTime} - {entry.endTime}
                     </TableCell>
